@@ -3,897 +3,909 @@
 
 <head>
 
-    <meta charset="UTF-8">
+<meta charset="UTF-8">
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
-    >
+<meta
+    name="viewport"
+    content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"
+>
 
-    <meta
-        name="theme-color"
-        content="#0878b8"
-    >
+<meta name="theme-color" content="#0878b8">
 
-    <title>Fish Match</title>
+<title>Fish Match</title>
 
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <!-- Telegram Mini App -->
+<style>
 
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+/* =========================================================
+   RESET
+========================================================= */
 
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
-    <!-- =====================================================
-         CSS
-    ====================================================== -->
+html,
+body {
+    margin: 0;
+    padding: 0;
 
-    <style>
+    width: 100%;
+    min-height: 100%;
 
-        * {
-            box-sizing: border-box;
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
 
-            -webkit-tap-highlight-color: transparent;
-        }
+    background:
+        linear-gradient(
+            180deg,
+            #73d9f5 0%,
+            #299fd4 45%,
+            #066da8 100%
+        );
 
+    color: white;
 
-        html,
-        body {
+    overflow-x: hidden;
 
-            margin: 0;
-            padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+}
 
-            width: 100%;
-            min-height: 100%;
 
-            font-family:
-                Arial,
-                Helvetica,
-                sans-serif;
+/* =========================================================
+   APP
+========================================================= */
 
-            background:
-                linear-gradient(
-                    180deg,
-                    #78ddf8 0%,
-                    #38a9dc 45%,
-                    #0878b8 100%
-                );
+#app {
+    width: 100%;
+    max-width: 520px;
 
-            color: white;
+    min-height: 100vh;
+    min-height: 100dvh;
 
-            overflow-x: hidden;
+    margin: 0 auto;
 
-            user-select: none;
-            -webkit-user-select: none;
+    padding:
+        calc(10px + env(safe-area-inset-top))
+        10px
+        calc(18px + env(safe-area-inset-bottom));
+}
 
-            overscroll-behavior: none;
-        }
 
+/* =========================================================
+   HEADER
+========================================================= */
 
-        body {
+.header {
+    display: flex;
 
-            min-height: 100vh;
-            min-height: 100dvh;
+    justify-content: space-between;
+    align-items: center;
 
-        }
+    margin-bottom: 10px;
+}
 
+.player {
+    display: flex;
+    align-items: center;
 
-        button {
+    gap: 9px;
+}
 
-            font-family: inherit;
+.avatar {
+    width: 43px;
+    height: 43px;
 
-        }
+    border-radius: 50%;
 
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-        #app {
+    background: white;
 
-            width: 100%;
+    color: #087db8;
 
-            max-width: 520px;
+    font-weight: 800;
 
-            min-height: 100vh;
-            min-height: 100dvh;
+    overflow: hidden;
 
-            margin: 0 auto;
+    box-shadow:
+        0 3px 8px rgba(0,0,0,.25);
+}
 
-            padding:
+.avatar img {
+    width: 100%;
+    height: 100%;
 
-                calc(
-                    10px +
-                    env(safe-area-inset-top)
-                )
+    object-fit: cover;
+}
 
-                10px
+.player-name {
+    max-width: 180px;
 
-                calc(
-                    20px +
-                    env(safe-area-inset-bottom)
-                );
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 
-        }
+    font-size: 15px;
+    font-weight: 700;
+}
 
+.level {
+    margin-top: 2px;
 
-        /* =================================================
-           HEADER
-        ================================================== */
+    font-size: 11px;
 
-        .game-header {
+    opacity: .8;
+}
 
-            display: flex;
+.coins {
+    display: flex;
+    align-items: center;
 
-            align-items: center;
+    gap: 5px;
 
-            justify-content: space-between;
+    padding:
+        7px 12px;
 
-            margin-bottom: 10px;
+    border-radius: 20px;
 
-        }
+    background:
+        rgba(0,0,0,.16);
 
+    font-weight: 700;
+}
 
-        .player {
 
-            display: flex;
+/* =========================================================
+   TOP
+========================================================= */
 
-            align-items: center;
+.top {
+    display: grid;
 
-            gap: 9px;
+    grid-template-columns:
+        1fr 1fr;
 
-        }
+    gap: 8px;
 
+    margin-bottom: 8px;
+}
 
-        .avatar {
+.stat {
+    padding: 7px;
 
-            width: 44px;
-            height: 44px;
+    border-radius: 14px;
 
-            flex-shrink: 0;
+    text-align: center;
 
-            border-radius: 50%;
+    background:
+        rgba(255,255,255,.18);
 
-            display: flex;
+    border:
+        1px solid
+        rgba(255,255,255,.25);
+}
 
-            align-items: center;
+.stat-title {
+    font-size: 9px;
 
-            justify-content: center;
+    opacity: .8;
 
-            background: white;
+    letter-spacing: .5px;
+}
 
-            color: #087fbd;
+.stat-value {
+    margin-top: 2px;
 
-            font-size: 18px;
+    font-size: 21px;
 
-            font-weight: 800;
+    font-weight: 800;
+}
 
-            overflow: hidden;
 
-            box-shadow:
+/* =========================================================
+   LEVEL TARGET
+========================================================= */
 
-                0 3px 8px
-                rgba(0,0,0,.20);
+.target {
+    margin-bottom: 10px;
 
-        }
+    padding:
+        9px 12px;
 
+    border-radius: 14px;
 
-        .avatar img {
+    background:
+        rgba(0,45,85,.20);
+}
 
-            width: 100%;
-            height: 100%;
+.target-title {
+    margin-bottom: 6px;
 
-            object-fit: cover;
+    font-size: 9px;
 
-            display: block;
+    opacity: .8;
 
-        }
+    letter-spacing: .5px;
+}
 
+.targets {
+    display: flex;
 
-        .player-name {
+    gap: 18px;
+}
 
-            max-width: 180px;
+.target-item {
+    display: flex;
 
-            overflow: hidden;
+    align-items: center;
 
-            text-overflow: ellipsis;
+    gap: 6px;
 
-            white-space: nowrap;
+    font-size: 13px;
 
-            font-size: 15px;
+    font-weight: 700;
+}
 
-            font-weight: 700;
+.target-gem {
+    width: 20px;
+    height: 20px;
 
-        }
+    border-radius: 50%;
 
+    box-shadow:
+        inset 2px 2px 4px rgba(255,255,255,.65),
+        inset -2px -3px 4px rgba(0,0,0,.25);
+}
 
-        .level-text {
 
-            margin-top: 2px;
+/* =========================================================
+   BOARD
+========================================================= */
 
-            font-size: 11px;
+.board {
+    position: relative;
 
-            opacity: .8;
+    width: 100%;
 
-        }
+    aspect-ratio: 1;
 
+    padding: 5px;
 
-        .coins {
+    display: grid;
 
-            display: flex;
+    grid-template-columns:
+        repeat(8,1fr);
 
-            align-items: center;
+    grid-template-rows:
+        repeat(8,1fr);
 
-            gap: 5px;
+    gap: 4px;
 
-            padding:
+    border-radius: 18px;
 
-                7px
-                12px;
+    background:
+        rgba(0,48,80,.34);
 
-            border-radius: 20px;
+    box-shadow:
+        inset 0 2px 5px rgba(0,0,0,.25),
+        0 8px 18px rgba(0,0,0,.25);
 
-            background:
-                rgba(0,0,0,.16);
+    touch-action: none;
+}
 
-            font-size: 15px;
 
-            font-weight: 700;
+/* =========================================================
+   CELL
+========================================================= */
 
-        }
+.cell {
+    position: relative;
 
+    display: flex;
 
-        .coin-icon {
+    align-items: center;
+    justify-content: center;
 
-            font-size: 18px;
+    border-radius: 12px;
 
-        }
+    background:
+        rgba(255,255,255,.08);
 
+    cursor: pointer;
+}
 
-        /* =================================================
-           STATS
-        ================================================== */
 
-        .stats {
+/* =========================================================
+   GEM
+========================================================= */
 
-            display: grid;
+.gem {
+    position: relative;
 
-            grid-template-columns:
-                1fr 1fr;
+    width: 78%;
+    height: 78%;
 
-            gap: 8px;
+    border-radius: 30%;
 
-            margin-bottom: 8px;
+    transform:
+        rotate(45deg);
 
-        }
+    transition:
+        transform .12s ease,
+        filter .12s ease;
 
+    box-shadow:
+        inset
+        4px 4px 5px
+        rgba(255,255,255,.55),
 
-        .stat-box {
+        inset
+        -5px -6px 7px
+        rgba(0,0,0,.28),
 
-            padding: 8px;
+        0 2px 4px
+        rgba(0,0,0,.3);
+}
 
-            text-align: center;
 
-            border-radius: 14px;
+/* Shine */
 
-            background:
-                rgba(255,255,255,.18);
+.gem::before {
+    content: "";
 
-            border:
-                1px solid
-                rgba(255,255,255,.25);
+    position: absolute;
 
-        }
+    width: 42%;
+    height: 18%;
 
+    left: 12%;
+    top: 10%;
 
-        .stat-title {
+    border-radius: 50%;
 
-            font-size: 9px;
+    background:
+        rgba(255,255,255,.6);
 
-            letter-spacing: .5px;
+    transform:
+        rotate(-45deg);
+}
 
-            opacity: .8;
 
-        }
+/* =========================================================
+   GEM COLORS
+========================================================= */
 
+.gem-0 {
+    background:
+        linear-gradient(
+            145deg,
+            #5ee7ff,
+            #1689e6
+        );
+}
 
-        .stat-value {
+.gem-1 {
+    background:
+        linear-gradient(
+            145deg,
+            #74f58b,
+            #16a83c
+        );
+}
 
-            margin-top: 2px;
+.gem-2 {
+    background:
+        linear-gradient(
+            145deg,
+            #ff7070,
+            #d51d32
+        );
+}
 
-            font-size: 22px;
+.gem-3 {
+    background:
+        linear-gradient(
+            145deg,
+            #fff06a,
+            #e6a600
+        );
+}
 
-            line-height: 23px;
+.gem-4 {
+    background:
+        linear-gradient(
+            145deg,
+            #e681ff,
+            #8a28d1
+        );
+}
 
-            font-weight: 800;
+.gem-5 {
+    background:
+        linear-gradient(
+            145deg,
+            #ffb366,
+            #ed641d
+        );
+}
 
-        }
 
+/* =========================================================
+   SELECTED
+========================================================= */
 
-        /* =================================================
-           TARGET
-        ================================================== */
+.cell.selected .gem {
+    transform:
+        rotate(45deg)
+        scale(.78);
 
-        .target-panel {
+    filter:
+        brightness(1.35);
 
-            padding:
+    box-shadow:
+        0 0 0 3px white,
+        0 0 15px rgba(255,255,255,.9);
+}
 
-                9px
-                12px;
 
-            margin-bottom: 10px;
+/* =========================================================
+   SPECIAL BOMB
+========================================================= */
 
-            border-radius: 14px;
+.special-bomb {
+    animation:
+        bombPulse
+        1s
+        infinite;
+}
 
-            background:
-                rgba(0,50,90,.18);
+.special-bomb::after {
+    content: "✦";
 
-        }
+    position: absolute;
 
+    inset: 0;
 
-        .target-title {
+    display: flex;
 
-            margin-bottom: 5px;
+    align-items: center;
+    justify-content: center;
 
-            font-size: 9px;
+    color: white;
 
-            letter-spacing: .5px;
+    font-size: 17px;
 
-            opacity: .8;
+    transform:
+        rotate(-45deg);
 
-        }
+    text-shadow:
+        0 1px 3px #000;
+}
 
+@keyframes bombPulse {
 
-        .target-items {
+    50% {
+        filter:
+            brightness(1.3);
+    }
 
-            display: flex;
+}
 
-            align-items: center;
 
-            gap: 22px;
+/* =========================================================
+   REMOVE
+========================================================= */
 
-        }
+.removing {
+    animation:
+        destroy
+        .25s
+        ease
+        forwards;
+}
 
+@keyframes destroy {
 
-        .target-item {
+    0% {
+        transform:
+            scale(1);
+        opacity: 1;
+    }
 
-            display: flex;
+    50% {
+        transform:
+            scale(1.25);
+        opacity: .8;
+    }
 
-            align-items: center;
+    100% {
+        transform:
+            scale(0);
+        opacity: 0;
+    }
 
-            gap: 5px;
+}
 
-            font-size: 13px;
 
-            font-weight: 700;
+/* =========================================================
+   SCORE POPUP
+========================================================= */
 
-        }
+.score-popup {
+    position: fixed;
 
+    z-index: 500;
 
-        .target-emoji {
+    pointer-events: none;
 
-            font-size: 19px;
+    font-size: 22px;
 
-        }
+    font-weight: 900;
 
+    color: white;
 
-        /* =================================================
-           GAME BOARD
-        ================================================== */
+    text-shadow:
+        0 2px 4px rgba(0,0,0,.6);
 
-        .game-board {
+    animation:
+        scoreFloat
+        .8s
+        ease
+        forwards;
+}
 
-            width: 100%;
+@keyframes scoreFloat {
 
-            aspect-ratio: 1 / 1;
+    0% {
+        opacity: 0;
 
-            display: grid;
+        transform:
+            translateY(10px)
+            scale(.7);
+    }
 
-            grid-template-columns:
-                repeat(8, 1fr);
+    20% {
+        opacity: 1;
+    }
 
-            grid-template-rows:
-                repeat(8, 1fr);
+    100% {
+        opacity: 0;
 
-            gap: 4px;
+        transform:
+            translateY(-55px)
+            scale(1.15);
+    }
 
-            padding: 5px;
+}
 
-            border-radius: 18px;
 
-            background:
-                rgba(0,55,95,.32);
+/* =========================================================
+   COMBO
+========================================================= */
 
-            box-shadow:
+.combo {
+    position: fixed;
 
-                inset
-                0 2px 5px
-                rgba(0,0,0,.18),
+    z-index: 600;
 
-                0 7px 16px
-                rgba(0,0,0,.20);
+    left: 50%;
 
-            touch-action: none;
+    top: 42%;
 
-        }
+    transform:
+        translate(-50%,-50%);
 
+    pointer-events: none;
 
-        /* =================================================
-           TILE
-        ================================================== */
+    font-size: 32px;
 
-        .tile {
+    font-weight: 900;
 
-            position: relative;
+    text-shadow:
+        0 3px 7px rgba(0,0,0,.6);
 
-            width: 100%;
-            height: 100%;
+    animation:
+        comboAnimation
+        .8s
+        ease
+        forwards;
+}
 
-            display: flex;
+@keyframes comboAnimation {
 
-            align-items: center;
+    0% {
+        opacity: 0;
 
-            justify-content: center;
+        transform:
+            translate(-50%,-50%)
+            scale(.5);
+    }
 
-            border-radius: 12px;
+    30% {
+        opacity: 1;
 
-            font-size:
-                clamp(
-                    21px,
-                    8vw,
-                    42px
-                );
+        transform:
+            translate(-50%,-50%)
+            scale(1.25);
+    }
 
-            cursor: pointer;
+    100% {
+        opacity: 0;
 
-            transform: scale(1);
+        transform:
+            translate(-50%,-75%)
+            scale(1);
+    }
 
-            transition:
+}
 
-                transform .12s ease,
 
-                filter .12s ease,
+/* =========================================================
+   BOOSTERS
+========================================================= */
 
-                opacity .15s ease;
+.boosters {
+    display: grid;
 
-            box-shadow:
+    grid-template-columns:
+        repeat(3,1fr);
 
-                inset
-                0 3px 4px
-                rgba(255,255,255,.42),
+    gap: 7px;
 
-                inset
-                0 -4px 5px
-                rgba(0,0,0,.16),
+    margin-top: 10px;
+}
 
-                0 2px 4px
-                rgba(0,0,0,.18);
+.booster {
+    padding:
+        8px 4px;
 
-            overflow: hidden;
+    border: none;
 
-        }
+    border-radius: 13px;
 
+    color: white;
 
-        .tile::after {
+    background:
+        rgba(255,255,255,.2);
 
-            content: "";
+    box-shadow:
+        0 3px 6px rgba(0,0,0,.2);
 
-            position: absolute;
+    cursor: pointer;
+}
 
-            left: 13%;
+.booster:active {
+    transform:
+        scale(.95);
+}
 
-            top: 8%;
+.booster:disabled {
+    opacity: .45;
+}
 
-            width: 42%;
+.booster-icon {
+    display: block;
 
-            height: 18%;
+    font-size: 21px;
+}
 
-            border-radius: 50%;
+.booster-name {
+    display: block;
 
-            background:
-                rgba(255,255,255,.35);
+    margin-top: 3px;
 
-            transform:
-                rotate(-20deg);
+    font-size: 9px;
+}
 
-            pointer-events: none;
 
-        }
+/* =========================================================
+   MESSAGE
+========================================================= */
 
+.message {
+    position: fixed;
 
-        .tile.selected {
+    inset: 0;
 
-            transform:
-                scale(.82);
+    z-index: 1000;
 
-            filter:
-                brightness(1.25);
+    display: flex;
 
-            box-shadow:
+    align-items: center;
+    justify-content: center;
 
-                0 0 0 3px white,
+    padding: 20px;
 
-                0 0 15px
-                rgba(255,255,255,.9);
+    background:
+        rgba(0,0,0,.55);
+}
 
-        }
+.message.hidden {
+    display: none;
+}
 
+.message-window {
+    width: 100%;
+    max-width: 360px;
 
-        .tile.removing {
+    padding:
+        28px 20px;
 
-            animation:
-                disappear .22s
-                ease forwards;
+    text-align: center;
 
-        }
+    color: #12618a;
 
+    border-radius: 24px;
 
-        @keyframes disappear {
+    background:
+        linear-gradient(
+            180deg,
+            white,
+            #e7f8ff
+        );
 
-            0% {
+    box-shadow:
+        0 15px 40px rgba(0,0,0,.35);
 
-                transform: scale(1);
+    animation:
+        popup .25s ease;
+}
 
-                opacity: 1;
+.message-icon {
+    font-size: 55px;
+}
 
-            }
+.message-window h2 {
+    margin:
+        9px 0 5px;
+}
 
-            100% {
+.message-window p {
+    margin:
+        0 0 20px;
 
-                transform: scale(0);
+    color: #47788d;
+}
 
-                opacity: 0;
+.main-button {
+    width: 100%;
 
-            }
+    padding: 13px;
 
-        }
+    border: none;
 
+    border-radius: 14px;
 
-        /* =================================================
-           BOOSTERS
-        ================================================== */
+    color: white;
 
-        .boosters {
+    font-size: 16px;
 
-            display: grid;
+    font-weight: 700;
 
-            grid-template-columns:
-                repeat(3, 1fr);
+    background:
+        linear-gradient(
+            180deg,
+            #39c8f1,
+            #087fc1
+        );
 
-            gap: 7px;
+    cursor: pointer;
+}
 
-            margin-top: 10px;
+@keyframes popup {
 
-        }
+    from {
+        transform:
+            scale(.7);
 
+        opacity: 0;
+    }
 
-        .booster {
+    to {
+        transform:
+            scale(1);
 
-            min-width: 0;
+        opacity: 1;
+    }
 
-            padding:
+}
 
-                8px
-                4px;
 
-            border: none;
+/* =========================================================
+   LOADING
+========================================================= */
 
-            border-radius: 13px;
+.loading {
+    position: fixed;
 
-            background:
-                rgba(255,255,255,.20);
+    inset: 0;
 
-            color: white;
+    z-index: 2000;
 
-            box-shadow:
-                0 3px 5px
-                rgba(0,0,0,.16);
+    display: flex;
 
-            cursor: pointer;
+    flex-direction: column;
 
-        }
+    align-items: center;
+    justify-content: center;
 
+    gap: 10px;
 
-        .booster:active {
+    background:
+        linear-gradient(
+            180deg,
+            #73d9f5,
+            #0878b8
+        );
 
-            transform:
-                scale(.95);
+    transition:
+        opacity .3s;
+}
 
-        }
+.loading.hidden {
+    opacity: 0;
 
+    pointer-events: none;
+}
 
-        .booster:disabled {
+.spinner {
+    width: 38px;
+    height: 38px;
 
-            opacity: .45;
+    border-radius: 50%;
 
-        }
+    border:
+        4px solid
+        rgba(255,255,255,.3);
 
+    border-top-color:
+        white;
 
-        .booster-icon {
+    animation:
+        spin .7s linear infinite;
+}
 
-            display: block;
+@keyframes spin {
 
-            font-size: 21px;
+    to {
+        transform:
+            rotate(360deg);
+    }
 
-        }
+}
 
 
-        .booster-name {
+/* =========================================================
+   SMALL SCREEN
+========================================================= */
 
-            display: block;
+@media (max-width:360px) {
 
-            margin-top: 3px;
+    #app {
+        padding-left: 7px;
+        padding-right: 7px;
+    }
 
-            font-size: 9px;
+    .board {
+        gap: 3px;
+        padding: 4px;
+    }
 
-        }
+    .cell {
+        border-radius: 9px;
+    }
 
+}
 
-        /* =================================================
-           MESSAGE
-        ================================================== */
-
-        .message {
-
-            position: fixed;
-
-            inset: 0;
-
-            z-index: 1000;
-
-            display: flex;
-
-            align-items: center;
-
-            justify-content: center;
-
-            padding: 20px;
-
-            background:
-                rgba(0,0,0,.56);
-
-        }
-
-
-        .message.hidden {
-
-            display: none;
-
-        }
-
-
-        .message-window {
-
-            width: 100%;
-
-            max-width: 360px;
-
-            padding:
-
-                28px
-                20px;
-
-            text-align: center;
-
-            color: #12618a;
-
-            border-radius: 24px;
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #ffffff,
-                    #e9f8ff
-                );
-
-            box-shadow:
-                0 15px 40px
-                rgba(0,0,0,.35);
-
-            animation:
-                popup .25s ease;
-
-        }
-
-
-        .message-icon {
-
-            font-size: 55px;
-
-        }
-
-
-        .message-window h2 {
-
-            margin:
-                9px
-                0
-                5px;
-
-        }
-
-
-        .message-window p {
-
-            margin:
-                0
-                0
-                20px;
-
-            color: #47788d;
-
-        }
-
-
-        .main-button {
-
-            width: 100%;
-
-            padding: 13px;
-
-            border: none;
-
-            border-radius: 14px;
-
-            color: white;
-
-            font-size: 16px;
-
-            font-weight: 700;
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #39c8f1,
-                    #087fc1
-                );
-
-            box-shadow:
-                0 4px 8px
-                rgba(0,0,0,.20);
-
-            cursor: pointer;
-
-        }
-
-
-        .main-button:active {
-
-            transform:
-                scale(.97);
-
-        }
-
-
-        @keyframes popup {
-
-            from {
-
-                transform:
-                    scale(.7);
-
-                opacity: 0;
-
-            }
-
-            to {
-
-                transform:
-                    scale(1);
-
-                opacity: 1;
-
-            }
-
-        }
-
-
-        /* =================================================
-           LOADING
-        ================================================== */
-
-        .loading {
-
-            position: fixed;
-
-            inset: 0;
-
-            z-index: 2000;
-
-            display: flex;
-
-            flex-direction: column;
-
-            align-items: center;
-
-            justify-content: center;
-
-            gap: 10px;
-
-            background:
-                linear-gradient(
-                    180deg,
-                    #78ddf8,
-                    #0878b8
-                );
-
-            font-size: 15px;
-
-            transition:
-                opacity .3s ease;
-
-        }
-
-
-        .loading.hidden {
-
-            opacity: 0;
-
-            pointer-events: none;
-
-        }
-
-
-        .loading-spinner {
-
-            width: 38px;
-            height: 38px;
-
-            border-radius: 50%;
-
-            border:
-                4px solid
-                rgba(255,255,255,.35);
-
-            border-top-color:
-                white;
-
-            animation:
-                spinner .7s
-                linear infinite;
-
-        }
-
-
-        @keyframes spinner {
-
-            to {
-
-                transform:
-                    rotate(360deg);
-
-            }
-
-        }
-
-
-        /* =================================================
-           SMALL SCREEN
-        ================================================== */
-
-        @media (max-width: 360px) {
-
-            #app {
-
-                padding-left: 7px;
-                padding-right: 7px;
-
-            }
-
-
-            .game-board {
-
-                gap: 3px;
-
-                padding: 4px;
-
-            }
-
-
-            .tile {
-
-                border-radius: 9px;
-
-            }
-
-        }
-
-    </style>
+</style>
 
 </head>
 
@@ -904,15 +916,11 @@
 <div id="app">
 
 
-    <!-- =================================================
-         HEADER
-    ================================================== -->
+    <!-- HEADER -->
 
-    <header class="game-header">
-
+    <header class="header">
 
         <div class="player">
-
 
             <div
                 id="avatar"
@@ -921,9 +929,7 @@
                 ?
             </div>
 
-
             <div>
-
 
                 <div
                     id="playerName"
@@ -932,8 +938,7 @@
                     Игрок
                 </div>
 
-
-                <div class="level-text">
+                <div class="level">
 
                     Уровень
                     <span id="level">
@@ -942,18 +947,14 @@
 
                 </div>
 
-
             </div>
-
 
         </div>
 
 
         <div class="coins">
 
-            <span class="coin-icon">
-                🪙
-            </span>
+            🪙
 
             <span id="coins">
                 100
@@ -961,19 +962,14 @@
 
         </div>
 
-
     </header>
 
 
+    <!-- STATS -->
 
-    <!-- =================================================
-         STATS
-    ================================================== -->
+    <section class="top">
 
-    <section class="stats">
-
-
-        <div class="stat-box">
+        <div class="stat">
 
             <div class="stat-title">
                 ОЧКИ
@@ -989,7 +985,7 @@
         </div>
 
 
-        <div class="stat-box">
+        <div class="stat">
 
             <div class="stat-title">
                 ХОДЫ
@@ -1004,31 +1000,25 @@
 
         </div>
 
-
     </section>
 
 
+    <!-- TARGET -->
 
-    <!-- =================================================
-         TARGET
-    ================================================== -->
-
-    <section class="target-panel">
-
+    <section class="target">
 
         <div class="target-title">
             ЦЕЛЬ УРОВНЯ
         </div>
 
-
-        <div class="target-items">
-
+        <div class="targets">
 
             <div class="target-item">
 
-                <span class="target-emoji">
-                    🔵
-                </span>
+                <span
+                    id="targetBlueGem"
+                    class="target-gem gem-0"
+                ></span>
 
                 <span id="blueTarget">
                     0 / 10
@@ -1039,9 +1029,10 @@
 
             <div class="target-item">
 
-                <span class="target-emoji">
-                    🟢
-                </span>
+                <span
+                    id="targetGreenGem"
+                    class="target-gem gem-1"
+                ></span>
 
                 <span id="greenTarget">
                     0 / 10
@@ -1049,40 +1040,30 @@
 
             </div>
 
-
         </div>
-
 
     </section>
 
 
-
-    <!-- =================================================
-         GAME
-    ================================================== -->
+    <!-- GAME BOARD -->
 
     <main>
 
         <div
-            id="gameBoard"
-            class="game-board"
+            id="board"
+            class="board"
         ></div>
 
     </main>
 
 
-
-    <!-- =================================================
-         BOOSTERS
-    ================================================== -->
+    <!-- BOOSTERS -->
 
     <section class="boosters">
-
 
         <button
             id="shuffleButton"
             class="booster"
-            type="button"
         >
 
             <span class="booster-icon">
@@ -1099,7 +1080,6 @@
         <button
             id="bombButton"
             class="booster"
-            type="button"
         >
 
             <span class="booster-icon">
@@ -1116,7 +1096,6 @@
         <button
             id="undoButton"
             class="booster"
-            type="button"
         >
 
             <span class="booster-icon">
@@ -1129,23 +1108,17 @@
 
         </button>
 
-
     </section>
 
 
-
-    <!-- =================================================
-         MESSAGE
-    ================================================== -->
+    <!-- MESSAGE -->
 
     <div
         id="message"
         class="message hidden"
     >
 
-
         <div class="message-window">
-
 
             <div
                 id="messageIcon"
@@ -1154,43 +1127,34 @@
                 🎉
             </div>
 
-
             <h2 id="messageTitle">
                 Уровень пройден!
             </h2>
-
 
             <p id="messageText">
                 Отличная работа!
             </p>
 
-
             <button
                 id="nextLevelButton"
                 class="main-button"
-                type="button"
             >
                 Следующий уровень
             </button>
 
-
         </div>
-
 
     </div>
 
 
-
-    <!-- =================================================
-         LOADING
-    ================================================== -->
+    <!-- LOADING -->
 
     <div
         id="loading"
         class="loading"
     >
 
-        <div class="loading-spinner"></div>
+        <div class="spinner"></div>
 
         <div>
             Загрузка...
@@ -1202,15 +1166,7 @@
 </div>
 
 
-
-<!-- =====================================================
-     JAVASCRIPT
-====================================================== -->
-
 <script>
-
-"use strict";
-
 
 /* =========================================================
    TELEGRAM
@@ -1232,58 +1188,34 @@ if (tg) {
     try {
 
         tg.setHeaderColor(
-            "#42bce8"
+            "#299fd4"
         );
 
         tg.setBackgroundColor(
-            "#0878b8"
+            "#066da8"
         );
 
-    } catch (error) {
-
-        console.log(
-            "Telegram UI error"
-        );
-
-    }
+    } catch (e) {}
 
 }
 
 
 /* =========================================================
-   GAME SETTINGS
+   CONFIG
 ========================================================= */
 
-const BOARD_SIZE = 8;
+const SIZE = 8;
 
-const TILE_TYPES = 6;
+const TYPES = 6;
 
 const START_MOVES = 30;
 
-const TARGET = 10;
-
 const SAVE_KEY =
-    "fish_match_game_v1";
+    "fish_match_stage2";
 
 
 /* =========================================================
-   GAME ELEMENTS
-========================================================= */
-
-const EMOJIS = [
-
-    "🔵",
-    "🟢",
-    "🔴",
-    "🟡",
-    "🟣",
-    "🟠"
-
-];
-
-
-/* =========================================================
-   GAME VARIABLES
+   STATE
 ========================================================= */
 
 let board = [];
@@ -1296,9 +1228,9 @@ let level = 1;
 
 let coins = 100;
 
-let blueCollected = 0;
+let blue = 0;
 
-let greenCollected = 0;
+let green = 0;
 
 let selected = null;
 
@@ -1308,12 +1240,12 @@ let busy = false;
 
 
 /* =========================================================
-   HTML ELEMENTS
+   DOM
 ========================================================= */
 
-const gameBoard =
+const boardElement =
     document.getElementById(
-        "gameBoard"
+        "board"
     );
 
 const scoreElement =
@@ -1336,22 +1268,22 @@ const coinsElement =
         "coins"
     );
 
-const blueTarget =
+const blueElement =
     document.getElementById(
         "blueTarget"
     );
 
-const greenTarget =
+const greenElement =
     document.getElementById(
         "greenTarget"
     );
 
-const playerName =
+const playerNameElement =
     document.getElementById(
         "playerName"
     );
 
-const avatar =
+const avatarElement =
     document.getElementById(
         "avatar"
     );
@@ -1381,6 +1313,11 @@ const nextLevelButton =
         "nextLevelButton"
     );
 
+const loading =
+    document.getElementById(
+        "loading"
+    );
+
 const shuffleButton =
     document.getElementById(
         "shuffleButton"
@@ -1396,29 +1333,18 @@ const undoButton =
         "undoButton"
     );
 
-const loading =
-    document.getElementById(
-        "loading"
-    );
-
 
 /* =========================================================
    TELEGRAM USER
 ========================================================= */
 
-function loadTelegramUser() {
+function loadUser() {
 
     if (
         !tg ||
         !tg.initDataUnsafe ||
         !tg.initDataUnsafe.user
     ) {
-
-        playerName.textContent =
-            "Игрок";
-
-        avatar.textContent =
-            "?";
 
         return;
 
@@ -1429,13 +1355,9 @@ function loadTelegramUser() {
         tg.initDataUnsafe.user;
 
 
-    const name =
+    playerNameElement.textContent =
         user.first_name ||
         "Игрок";
-
-
-    playerName.textContent =
-        name;
 
 
     if (user.photo_url) {
@@ -1448,22 +1370,22 @@ function loadTelegramUser() {
         img.src =
             user.photo_url;
 
-        img.alt =
-            name;
-
-        avatar.innerHTML =
+        avatarElement.innerHTML =
             "";
 
-        avatar.appendChild(
+        avatarElement.appendChild(
             img
         );
 
     } else {
 
-        avatar.textContent =
-            name
-                .charAt(0)
-                .toUpperCase();
+        avatarElement.textContent =
+            (
+                user.first_name ||
+                "И"
+            )
+            .charAt(0)
+            .toUpperCase();
 
     }
 
@@ -1471,14 +1393,13 @@ function loadTelegramUser() {
 
 
 /* =========================================================
-   RANDOM TILE
+   RANDOM
 ========================================================= */
 
-function randomTile() {
+function randomType() {
 
     return Math.floor(
-        Math.random() *
-        TILE_TYPES
+        Math.random() * TYPES
     );
 
 }
@@ -1494,48 +1415,49 @@ function createBoard() {
 
 
     for (
-        let row = 0;
-        row < BOARD_SIZE;
-        row++
+        let r = 0;
+        r < SIZE;
+        r++
     ) {
 
-        board[row] = [];
+        board[r] = [];
 
 
         for (
-            let col = 0;
-            col < BOARD_SIZE;
-            col++
+            let c = 0;
+            c < SIZE;
+            c++
         ) {
 
-            let tile;
+            let type;
 
 
             do {
 
-                tile =
-                    randomTile();
+                type =
+                    randomType();
 
             } while (
-                createsInitialMatch(
-                    row,
-                    col,
-                    tile
+                createsMatch(
+                    r,
+                    c,
+                    type
                 )
             );
 
 
-            board[row][col] =
-                tile;
+            board[r][c] = {
+
+                type: type,
+
+                special: null
+
+            };
 
         }
 
     }
 
-
-    /*
-     * Проверяем, есть ли ход
-     */
 
     if (
         !hasPossibleMove()
@@ -1549,24 +1471,21 @@ function createBoard() {
 
 
 /* =========================================================
-   INITIAL MATCH CHECK
+   INITIAL MATCH
 ========================================================= */
 
-function createsInitialMatch(
-    row,
-    col,
-    tile
+function createsMatch(
+    r,
+    c,
+    type
 ) {
 
-
-    /*
-     * Горизонталь
-     */
-
     if (
-        col >= 2 &&
-        board[row][col - 1] === tile &&
-        board[row][col - 2] === tile
+        c >= 2 &&
+        board[r][c - 1] &&
+        board[r][c - 2] &&
+        board[r][c - 1].type === type &&
+        board[r][c - 2].type === type
     ) {
 
         return true;
@@ -1574,14 +1493,12 @@ function createsInitialMatch(
     }
 
 
-    /*
-     * Вертикаль
-     */
-
     if (
-        row >= 2 &&
-        board[row - 1][col] === tile &&
-        board[row - 2][col] === tile
+        r >= 2 &&
+        board[r - 1][c] &&
+        board[r - 2][c] &&
+        board[r - 1][c].type === type &&
+        board[r - 2][c].type === type
     ) {
 
         return true;
@@ -1598,70 +1515,93 @@ function createsInitialMatch(
    RENDER
 ========================================================= */
 
-function renderBoard() {
+function render() {
 
-    gameBoard.innerHTML =
+    boardElement.innerHTML =
         "";
 
 
     for (
-        let row = 0;
-        row < BOARD_SIZE;
-        row++
+        let r = 0;
+        r < SIZE;
+        r++
     ) {
 
-
         for (
-            let col = 0;
-            col < BOARD_SIZE;
-            col++
+            let c = 0;
+            c < SIZE;
+            c++
         ) {
 
-            const tile =
+            const cell =
                 document.createElement(
                     "div"
                 );
 
 
-            tile.className =
-                "tile";
+            cell.className =
+                "cell";
 
 
-            tile.dataset.row =
-                row;
+            cell.dataset.row = r;
 
-            tile.dataset.col =
-                col;
+            cell.dataset.col = c;
 
 
-            tile.textContent =
-                EMOJIS[
-                    board[row][col]
-                ];
+            const gem =
+                document.createElement(
+                    "div"
+                );
+
+
+            const item =
+                board[r][c];
+
+
+            gem.className =
+                "gem gem-" +
+                item.type;
+
+
+            if (
+                item.special ===
+                "bomb"
+            ) {
+
+                gem.classList.add(
+                    "special-bomb"
+                );
+
+            }
 
 
             if (
                 selected &&
-                selected.row === row &&
-                selected.col === col
+                selected.r === r &&
+                selected.c === c
             ) {
 
-                tile.classList.add(
+                cell.classList.add(
                     "selected"
                 );
 
             }
 
 
-            addTileEvents(
-                tile,
-                row,
-                col
+            cell.appendChild(
+                gem
             );
 
 
-            gameBoard.appendChild(
-                tile
+            addEvents(
+                cell,
+                r,
+                c
+            );
+
+
+            boardElement.appendChild(
+                cell
             );
 
         }
@@ -1672,57 +1612,43 @@ function renderBoard() {
 
 
 /* =========================================================
-   TILE EVENTS
+   EVENTS
 ========================================================= */
 
-function addTileEvents(
-    tile,
-    row,
-    col
+function addEvents(
+    cell,
+    r,
+    c
 ) {
 
-
-    /*
-     * CLICK
-     */
-
-    tile.addEventListener(
+    cell.addEventListener(
         "click",
-        function() {
+        () => {
 
             if (busy) {
                 return;
             }
 
-            selectTile(
-                row,
-                col
+            select(
+                r,
+                c
             );
 
         }
     );
 
 
-    /*
-     * SWIPE
-     */
-
     let startX = 0;
 
     let startY = 0;
 
 
-    tile.addEventListener(
+    cell.addEventListener(
         "touchstart",
-        function(event) {
-
-            if (busy) {
-                return;
-            }
-
+        e => {
 
             const touch =
-                event.touches[0];
+                e.touches[0];
 
 
             startX =
@@ -1738,9 +1664,9 @@ function addTileEvents(
     );
 
 
-    tile.addEventListener(
+    cell.addEventListener(
         "touchend",
-        function(event) {
+        e => {
 
             if (busy) {
                 return;
@@ -1748,7 +1674,7 @@ function addTileEvents(
 
 
             const touch =
-                event.changedTouches[0];
+                e.changedTouches[0];
 
 
             const dx =
@@ -1761,86 +1687,48 @@ function addTileEvents(
                 startY;
 
 
-            const minSwipe =
-                20;
-
-
-            /*
-             * Обычный клик
-             */
-
             if (
-                Math.abs(dx) < minSwipe &&
-                Math.abs(dy) < minSwipe
+                Math.abs(dx) < 20 &&
+                Math.abs(dy) < 20
             ) {
 
-                selectTile(
-                    row,
-                    col
-                );
+                select(r,c);
 
                 return;
 
             }
 
 
-            let targetRow =
-                row;
+            let tr = r;
 
-            let targetCol =
-                col;
+            let tc = c;
 
-
-            /*
-             * Горизонталь
-             */
 
             if (
                 Math.abs(dx) >
                 Math.abs(dy)
             ) {
 
-                if (dx > 0) {
+                tc +=
+                    dx > 0
+                        ? 1
+                        : -1;
 
-                    targetCol++;
+            } else {
 
-                } else {
-
-                    targetCol--;
-
-                }
-
-            }
-
-
-            /*
-             * Вертикаль
-             */
-
-            else {
-
-                if (dy > 0) {
-
-                    targetRow++;
-
-                } else {
-
-                    targetRow--;
-
-                }
+                tr +=
+                    dy > 0
+                        ? 1
+                        : -1;
 
             }
 
-
-            /*
-             * Границы
-             */
 
             if (
-                targetRow < 0 ||
-                targetRow >= BOARD_SIZE ||
-                targetCol < 0 ||
-                targetCol >= BOARD_SIZE
+                tr < 0 ||
+                tr >= SIZE ||
+                tc < 0 ||
+                tc >= SIZE
             ) {
 
                 return;
@@ -1848,11 +1736,11 @@ function addTileEvents(
             }
 
 
-            swapAndCheck(
-                row,
-                col,
-                targetRow,
-                targetCol
+            move(
+                r,
+                c,
+                tr,
+                tc
             );
 
         },
@@ -1865,69 +1753,53 @@ function addTileEvents(
 
 
 /* =========================================================
-   SELECT TILE
+   SELECT
 ========================================================= */
 
-function selectTile(
-    row,
-    col
-) {
-
-
-    /*
-     * Первая клетка
-     */
+function select(r,c) {
 
     if (!selected) {
 
         selected = {
-            row,
-            col
+            r,
+            c
         };
 
-        renderBoard();
+        render();
 
         return;
 
     }
 
 
-    /*
-     * Та же клетка
-     */
-
     if (
-        selected.row === row &&
-        selected.col === col
+        selected.r === r &&
+        selected.c === c
     ) {
 
         selected = null;
 
-        renderBoard();
+        render();
 
         return;
 
     }
 
 
-    /*
-     * Соседняя
-     */
-
     if (
-        isAdjacent(
-            selected.row,
-            selected.col,
-            row,
-            col
+        adjacent(
+            selected.r,
+            selected.c,
+            r,
+            c
         )
     ) {
 
-        swapAndCheck(
-            selected.row,
-            selected.col,
-            row,
-            col
+        move(
+            selected.r,
+            selected.c,
+            r,
+            c
         );
 
         return;
@@ -1935,16 +1807,13 @@ function selectTile(
     }
 
 
-    /*
-     * Другая клетка
-     */
-
     selected = {
-        row,
-        col
+        r,
+        c
     };
 
-    renderBoard();
+
+    render();
 
 }
 
@@ -1953,16 +1822,16 @@ function selectTile(
    ADJACENT
 ========================================================= */
 
-function isAdjacent(
-    row1,
-    col1,
-    row2,
-    col2
+function adjacent(
+    r1,
+    c1,
+    r2,
+    c2
 ) {
 
     return (
-        Math.abs(row1 - row2) +
-        Math.abs(col1 - col2)
+        Math.abs(r1-r2) +
+        Math.abs(c1-c2)
     ) === 1;
 
 }
@@ -1972,53 +1841,34 @@ function isAdjacent(
    SWAP
 ========================================================= */
 
-function swapTiles(
-    row1,
-    col1,
-    row2,
-    col2
+function swap(
+    r1,
+    c1,
+    r2,
+    c2
 ) {
 
     const temp =
-        board[row1][col1];
+        board[r1][c1];
 
+    board[r1][c1] =
+        board[r2][c2];
 
-    board[row1][col1] =
-        board[row2][col2];
-
-
-    board[row2][col2] =
+    board[r2][c2] =
         temp;
 
 }
 
 
 /* =========================================================
-   COPY BOARD
+   MOVE
 ========================================================= */
 
-function copyBoard() {
-
-    return board.map(
-        function(row) {
-
-            return [...row];
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   SWAP AND CHECK
-========================================================= */
-
-async function swapAndCheck(
-    row1,
-    col1,
-    row2,
-    col2
+async function move(
+    r1,
+    c1,
+    r2,
+    c2
 ) {
 
     if (busy) {
@@ -2029,63 +1879,47 @@ async function swapAndCheck(
     busy = true;
 
 
-    /*
-     * Сохраняем поле
-     */
-
     previousBoard =
-        copyBoard();
+        cloneBoard();
 
 
-    /*
-     * Меняем клетки
-     */
-
-    swapTiles(
-        row1,
-        col1,
-        row2,
-        col2
+    swap(
+        r1,
+        c1,
+        r2,
+        c2
     );
 
 
     selected = null;
 
 
-    renderBoard();
+    render();
 
 
-    await sleep(120);
+    await wait(130);
 
-
-    /*
-     * Ищем комбинации
-     */
 
     const matches =
         findMatches();
 
 
-    /*
-     * Если комбинации нет,
-     * возвращаем клетки
-     */
+    if (
+        matches.length === 0
+    ) {
 
-    if (matches.size === 0) {
-
-        swapTiles(
-            row1,
-            col1,
-            row2,
-            col2
+        swap(
+            r1,
+            c1,
+            r2,
+            c2
         );
 
 
-        previousBoard =
-            null;
+        previousBoard = null;
 
 
-        renderBoard();
+        render();
 
 
         busy = false;
@@ -2094,76 +1928,56 @@ async function swapAndCheck(
 
     }
 
-
-    /*
-     * Ход потрачен
-     */
 
     moves--;
 
 
-    updateUI();
+    update();
 
-
-    /*
-     * Обрабатываем совпадения
-     */
 
     await processMatches();
 
 
-    /*
-     * Проверяем результат
-     */
-
     if (
-        blueCollected >= TARGET &&
-        greenCollected >= TARGET
+        checkWin()
     ) {
-
-        showWin();
 
         busy = false;
 
-        saveGame();
+        save();
 
         return;
 
     }
 
 
-    if (moves <= 0) {
+    if (
+        moves <= 0
+    ) {
 
         showLose();
 
         busy = false;
 
-        saveGame();
+        save();
 
         return;
 
     }
 
 
-    /*
-     * Если ходов нет —
-     * создаём новый ход
-     */
-
     if (
         !hasPossibleMove()
     ) {
 
-        shuffleBoard();
+        shuffle();
 
-        renderBoard();
+        render();
 
     }
 
 
-    updateUI();
-
-    saveGame();
+    save();
 
 
     busy = false;
@@ -2177,7 +1991,7 @@ async function swapAndCheck(
 
 function findMatches() {
 
-    const matches =
+    const set =
         new Set();
 
 
@@ -2186,20 +2000,20 @@ function findMatches() {
      */
 
     for (
-        let row = 0;
-        row < BOARD_SIZE;
-        row++
+        let r = 0;
+        r < SIZE;
+        r++
     ) {
 
         let start = 0;
 
 
         while (
-            start < BOARD_SIZE
+            start < SIZE
         ) {
 
             const type =
-                board[row][start];
+                board[r][start].type;
 
 
             let end =
@@ -2207,8 +2021,8 @@ function findMatches() {
 
 
             while (
-                end < BOARD_SIZE &&
-                board[row][end] === type
+                end < SIZE &&
+                board[r][end].type === type
             ) {
 
                 end++;
@@ -2217,17 +2031,17 @@ function findMatches() {
 
 
             if (
-                end - start >= 3
+                end-start >= 3
             ) {
 
                 for (
-                    let col = start;
-                    col < end;
-                    col++
+                    let c=start;
+                    c<end;
+                    c++
                 ) {
 
-                    matches.add(
-                        row + "," + col
+                    set.add(
+                        r+","+c
                     );
 
                 }
@@ -2247,29 +2061,29 @@ function findMatches() {
      */
 
     for (
-        let col = 0;
-        col < BOARD_SIZE;
-        col++
+        let c = 0;
+        c < SIZE;
+        c++
     ) {
 
         let start = 0;
 
 
         while (
-            start < BOARD_SIZE
+            start < SIZE
         ) {
 
             const type =
-                board[start][col];
+                board[start][c].type;
 
 
             let end =
-                start + 1;
+                start+1;
 
 
             while (
-                end < BOARD_SIZE &&
-                board[end][col] === type
+                end < SIZE &&
+                board[end][c].type === type
             ) {
 
                 end++;
@@ -2278,17 +2092,17 @@ function findMatches() {
 
 
             if (
-                end - start >= 3
+                end-start >= 3
             ) {
 
                 for (
-                    let row = start;
-                    row < end;
-                    row++
+                    let r=start;
+                    r<end;
+                    r++
                 ) {
 
-                    matches.add(
-                        row + "," + col
+                    set.add(
+                        r+","+c
                     );
 
                 }
@@ -2303,7 +2117,9 @@ function findMatches() {
     }
 
 
-    return matches;
+    return [
+        ...set
+    ];
 
 }
 
@@ -2324,7 +2140,7 @@ async function processMatches() {
 
 
         if (
-            matches.size === 0
+            matches.length === 0
         ) {
 
             break;
@@ -2336,41 +2152,51 @@ async function processMatches() {
 
 
         /*
-         * Считаем цели
+         * Считаем элементы
          */
 
         for (
             const key of matches
         ) {
 
-            const parts =
-                key.split(",");
-
-
-            const row =
-                Number(parts[0]);
-
-
-            const col =
-                Number(parts[1]);
+            const [
+                r,
+                c
+            ] =
+                key
+                    .split(",")
+                    .map(Number);
 
 
             const type =
-                board[row][col];
+                board[r][c].type;
 
 
             if (type === 0) {
 
-                blueCollected++;
+                blue++;
 
             }
 
 
             if (type === 1) {
 
-                greenCollected++;
+                green++;
 
             }
+
+        }
+
+
+        /*
+         * Комбо
+         */
+
+        if (combo >= 2) {
+
+            showCombo(
+                combo
+            );
 
         }
 
@@ -2379,68 +2205,101 @@ async function processMatches() {
          * Очки
          */
 
-        score +=
-            matches.size *
+        const points =
+            matches.length *
             10 *
             combo;
 
 
+        score += points;
+
+
+        showScore(
+            points
+        );
+
+
         /*
-         * Удаляем
+         * Если 4+ —
+         * создаём бомбу
+         */
+
+        if (
+            matches.length >= 4
+        ) {
+
+            const key =
+                matches[
+                    Math.floor(
+                        matches.length/2
+                    )
+                ];
+
+
+            const [
+                br,
+                bc
+            ] =
+                key
+                    .split(",")
+                    .map(Number);
+
+
+            board[br][bc].special =
+                "bomb";
+
+        }
+
+
+        /*
+         * Удаляем остальные
          */
 
         for (
             const key of matches
         ) {
 
-            const parts =
-                key.split(",");
+            const [
+                r,
+                c
+            ] =
+                key
+                    .split(",")
+                    .map(Number);
 
 
-            const row =
-                Number(parts[0]);
+            if (
+                board[r][c].special ===
+                "bomb"
+            ) {
+
+                continue;
+
+            }
 
 
-            const col =
-                Number(parts[1]);
-
-
-            board[row][col] =
+            board[r][c] =
                 null;
 
         }
 
 
-        updateUI();
+        update();
 
 
-        await sleep(180);
+        await wait(230);
 
 
-        /*
-         * Падаем
-         */
-
-        collapseBoard();
+        collapse();
 
 
-        renderBoard();
+        fill();
 
 
-        await sleep(180);
+        render();
 
 
-        /*
-         * Заполняем
-         */
-
-        fillBoard();
-
-
-        renderBoard();
-
-
-        await sleep(180);
+        await wait(220);
 
     }
 
@@ -2451,38 +2310,37 @@ async function processMatches() {
    COLLAPSE
 ========================================================= */
 
-function collapseBoard() {
+function collapse() {
 
     for (
-        let col = 0;
-        col < BOARD_SIZE;
-        col++
+        let c=0;
+        c<SIZE;
+        c++
     ) {
 
         let write =
-            BOARD_SIZE - 1;
+            SIZE-1;
 
 
         for (
-            let row =
-                BOARD_SIZE - 1;
-            row >= 0;
-            row--
+            let r=SIZE-1;
+            r>=0;
+            r--
         ) {
 
             if (
-                board[row][col] !== null
+                board[r][c] !== null
             ) {
 
-                board[write][col] =
-                    board[row][col];
+                board[write][c] =
+                    board[r][c];
 
 
                 if (
-                    write !== row
+                    write !== r
                 ) {
 
-                    board[row][col] =
+                    board[r][c] =
                         null;
 
                 }
@@ -2496,10 +2354,10 @@ function collapseBoard() {
 
 
         while (
-            write >= 0
+            write>=0
         ) {
 
-            board[write][col] =
+            board[write][c] =
                 null;
 
             write--;
@@ -2515,26 +2373,33 @@ function collapseBoard() {
    FILL
 ========================================================= */
 
-function fillBoard() {
+function fill() {
 
     for (
-        let row = 0;
-        row < BOARD_SIZE;
-        row++
+        let r=0;
+        r<SIZE;
+        r++
     ) {
 
         for (
-            let col = 0;
-            col < BOARD_SIZE;
-            col++
+            let c=0;
+            c<SIZE;
+            c++
         ) {
 
             if (
-                board[row][col] === null
+                board[r][c] === null
             ) {
 
-                board[row][col] =
-                    randomTile();
+                board[r][c] = {
+
+                    type:
+                        randomType(),
+
+                    special:
+                        null
+
+                };
 
             }
 
@@ -2546,58 +2411,29 @@ function fillBoard() {
 
 
 /* =========================================================
-   UPDATE UI
+   CHECK WIN
 ========================================================= */
 
-function updateUI() {
+function checkWin() {
 
-    scoreElement.textContent =
-        score;
-
-
-    movesElement.textContent =
-        moves;
+    const target =
+        10 +
+        (level-1)*2;
 
 
-    levelElement.textContent =
-        level;
+    if (
+        blue >= target &&
+        green >= target
+    ) {
+
+        showWin();
+
+        return true;
+
+    }
 
 
-    coinsElement.textContent =
-        coins;
-
-
-    blueTarget.textContent =
-        Math.min(
-            blueCollected,
-            TARGET
-        ) +
-        " / " +
-        TARGET;
-
-
-    greenTarget.textContent =
-        Math.min(
-            greenCollected,
-            TARGET
-        ) +
-        " / " +
-        TARGET;
-
-
-    shuffleButton.disabled =
-        busy ||
-        moves <= 0;
-
-
-    bombButton.disabled =
-        busy ||
-        moves <= 0;
-
-
-    undoButton.disabled =
-        busy ||
-        !previousBoard;
+    return false;
 
 }
 
@@ -2608,8 +2444,13 @@ function updateUI() {
 
 function showWin() {
 
+    coins +=
+        50 +
+        level*10;
+
+
     messageIcon.textContent =
-        "🎉";
+        "🏆";
 
 
     messageTitle.textContent =
@@ -2617,9 +2458,11 @@ function showWin() {
 
 
     messageText.textContent =
-        "Ты набрал " +
-        score +
-        " очков.";
+        "Получено монет: " +
+        (
+            50 +
+            level*10
+        );
 
 
     nextLevelButton.textContent =
@@ -2633,6 +2476,9 @@ function showWin() {
 
     busy = true;
 
+
+    save();
+
 }
 
 
@@ -2643,19 +2489,19 @@ function showWin() {
 function showLose() {
 
     messageIcon.textContent =
-        "😔";
+        "💔";
 
 
     messageTitle.textContent =
-        "Ходы закончились";
+        "Попробуй ещё раз";
 
 
     messageText.textContent =
-        "Попробуй пройти уровень ещё раз.";
+        "Ходы закончились.";
 
 
     nextLevelButton.textContent =
-        "Начать заново";
+        "Повторить уровень";
 
 
     message.classList.remove(
@@ -2676,10 +2522,11 @@ nextLevelButton.addEventListener(
     "click",
     function() {
 
-
         const won =
-            blueCollected >= TARGET &&
-            greenCollected >= TARGET;
+            blue >=
+                (10+(level-1)*2) &&
+            green >=
+                (10+(level-1)*2);
 
 
         message.classList.add(
@@ -2691,8 +2538,6 @@ nextLevelButton.addEventListener(
 
             level++;
 
-            coins += 50;
-
         }
 
 
@@ -2702,9 +2547,9 @@ nextLevelButton.addEventListener(
             START_MOVES;
 
 
-        blueCollected = 0;
+        blue = 0;
 
-        greenCollected = 0;
+        green = 0;
 
 
         selected = null;
@@ -2715,189 +2560,18 @@ nextLevelButton.addEventListener(
         createBoard();
 
 
-        updateUI();
+        update();
 
-        renderBoard();
+        render();
 
 
         busy = false;
 
 
-        saveGame();
+        save();
 
     }
 );
-
-
-/* =========================================================
-   SHUFFLE BUTTON
-========================================================= */
-
-shuffleButton.addEventListener(
-    "click",
-    function() {
-
-        if (
-            busy ||
-            moves <= 0
-        ) {
-
-            return;
-
-        }
-
-
-        previousBoard =
-            copyBoard();
-
-
-        moves--;
-
-
-        shuffleBoard();
-
-
-        updateUI();
-
-        renderBoard();
-
-
-        if (moves <= 0) {
-
-            checkGameOver();
-
-        }
-
-
-        saveGame();
-
-    }
-);
-
-
-/* =========================================================
-   SHUFFLE BOARD
-========================================================= */
-
-function shuffleBoard() {
-
-    let attempts = 0;
-
-
-    do {
-
-        const values = [];
-
-
-        for (
-            let row = 0;
-            row < BOARD_SIZE;
-            row++
-        ) {
-
-            for (
-                let col = 0;
-                col < BOARD_SIZE;
-                col++
-            ) {
-
-                values.push(
-                    board[row][col]
-                );
-
-            }
-
-        }
-
-
-        /*
-         * Fisher-Yates
-         */
-
-        for (
-            let i =
-                values.length - 1;
-            i > 0;
-            i--
-        ) {
-
-            const j =
-                Math.floor(
-                    Math.random() *
-                    (i + 1)
-                );
-
-
-            const temp =
-                values[i];
-
-
-            values[i] =
-                values[j];
-
-
-            values[j] =
-                temp;
-
-        }
-
-
-        let index = 0;
-
-
-        for (
-            let row = 0;
-            row < BOARD_SIZE;
-            row++
-        ) {
-
-            for (
-                let col = 0;
-                col < BOARD_SIZE;
-                col++
-            ) {
-
-                board[row][col] =
-                    values[index++];
-
-            }
-
-        }
-
-
-        attempts++;
-
-
-        if (
-            findMatches().size === 0 &&
-            hasPossibleMove()
-        ) {
-
-            break;
-
-        }
-
-
-    } while (
-        attempts < 100
-    );
-
-
-    /*
-     * Если не получилось —
-     * создаём новое поле
-     */
-
-    if (
-        findMatches().size > 0 ||
-        !hasPossibleMove()
-    ) {
-
-        createBoard();
-
-    }
-
-}
 
 
 /* =========================================================
@@ -2922,79 +2596,78 @@ bombButton.addEventListener(
 
 
         previousBoard =
-            copyBoard();
+            cloneBoard();
 
 
         moves--;
 
 
         /*
-         * Случайная клетка
+         * Случайный центр
          */
 
-        const centerRow =
+        const r =
             Math.floor(
-                Math.random() *
-                BOARD_SIZE
+                Math.random()*SIZE
             );
 
 
-        const centerCol =
+        const c =
             Math.floor(
-                Math.random() *
-                BOARD_SIZE
+                Math.random()*SIZE
             );
 
 
         /*
-         * Уничтожаем 3x3
+         * 3x3
          */
 
         for (
-            let row =
-                centerRow - 1;
-            row <= centerRow + 1;
-            row++
+            let rr=r-1;
+            rr<=r+1;
+            rr++
         ) {
 
             for (
-                let col =
-                    centerCol - 1;
-                col <= centerCol + 1;
-                col++
+                let cc=c-1;
+                cc<=c+1;
+                cc++
             ) {
 
-
                 if (
-                    row >= 0 &&
-                    row < BOARD_SIZE &&
-                    col >= 0 &&
-                    col < BOARD_SIZE
+                    rr>=0 &&
+                    rr<SIZE &&
+                    cc>=0 &&
+                    cc<SIZE
                 ) {
 
-                    const type =
-                        board[row][col];
+                    const item =
+                        board[rr][cc];
 
 
-                    if (type === 0) {
+                    if (
+                        item.type === 0
+                    ) {
 
-                        blueCollected++;
-
-                    }
-
-
-                    if (type === 1) {
-
-                        greenCollected++;
+                        blue++;
 
                     }
 
 
-                    board[row][col] =
-                        null;
+                    if (
+                        item.type === 1
+                    ) {
+
+                        green++;
+
+                    }
 
 
                     score += 10;
+
+
+                    board[rr][cc] =
+                        null;
 
                 }
 
@@ -3003,52 +2676,197 @@ bombButton.addEventListener(
         }
 
 
-        updateUI();
-
-        renderBoard();
+        update();
 
 
-        await sleep(180);
+        render();
 
 
-        collapseBoard();
-
-        fillBoard();
+        await wait(200);
 
 
-        renderBoard();
+        collapse();
+
+        fill();
+
+
+        render();
 
 
         if (
-            blueCollected >= TARGET &&
-            greenCollected >= TARGET
+            checkWin()
         ) {
 
-            showWin();
+            busy = false;
+
+            return;
 
         }
 
 
-        else if (
+        if (
             moves <= 0
         ) {
 
             showLose();
 
-        }
-
-
-        else {
-
             busy = false;
 
+            return;
+
         }
 
 
-        saveGame();
+        busy = false;
+
+
+        save();
 
     }
 );
+
+
+/* =========================================================
+   SHUFFLE
+========================================================= */
+
+shuffleButton.addEventListener(
+    "click",
+    function() {
+
+        if (
+            busy ||
+            moves <= 0
+        ) {
+
+            return;
+
+        }
+
+
+        previousBoard =
+            cloneBoard();
+
+
+        moves--;
+
+
+        shuffle();
+
+
+        update();
+
+        render();
+
+
+        if (
+            moves <= 0
+        ) {
+
+            if (
+                !checkWin()
+            ) {
+
+                showLose();
+
+            }
+
+        }
+
+
+        save();
+
+    }
+);
+
+
+/* =========================================================
+   SHUFFLE BOARD
+========================================================= */
+
+function shuffle() {
+
+    const items = [];
+
+
+    for (
+        let r=0;
+        r<SIZE;
+        r++
+    ) {
+
+        for (
+            let c=0;
+            c<SIZE;
+            c++
+        ) {
+
+            items.push(
+                board[r][c]
+            );
+
+        }
+
+    }
+
+
+    for (
+        let i=items.length-1;
+        i>0;
+        i--
+    ) {
+
+        const j =
+            Math.floor(
+                Math.random()*(i+1)
+            );
+
+
+        [
+            items[i],
+            items[j]
+        ] =
+        [
+            items[j],
+            items[i]
+        ];
+
+    }
+
+
+    let index=0;
+
+
+    for (
+        let r=0;
+        r<SIZE;
+        r++
+    ) {
+
+        for (
+            let c=0;
+            c<SIZE;
+            c++
+        ) {
+
+            board[r][c] =
+                items[index++];
+
+        }
+
+    }
+
+
+    if (
+        findMatches().length ||
+        !hasPossibleMove()
+    ) {
+
+        createBoard();
+
+    }
+
+}
 
 
 /* =========================================================
@@ -3070,12 +2888,8 @@ undoButton.addEventListener(
 
 
         board =
-            previousBoard.map(
-                function(row) {
-
-                    return [...row];
-
-                }
+            cloneSpecificBoard(
+                previousBoard
             );
 
 
@@ -3083,12 +2897,48 @@ undoButton.addEventListener(
             null;
 
 
-        renderBoard();
+        render();
 
-        updateUI();
+        update();
 
     }
 );
+
+
+/* =========================================================
+   CLONE
+========================================================= */
+
+function cloneBoard() {
+
+    return cloneSpecificBoard(
+        board
+    );
+
+}
+
+
+function cloneSpecificBoard(
+    source
+) {
+
+    return source.map(
+        row =>
+            row.map(
+                item =>
+                    item
+                        ? {
+                            type:
+                                item.type,
+
+                            special:
+                                item.special
+                        }
+                        : null
+            )
+    );
+
+}
 
 
 /* =========================================================
@@ -3098,48 +2948,43 @@ undoButton.addEventListener(
 function hasPossibleMove() {
 
     for (
-        let row = 0;
-        row < BOARD_SIZE;
-        row++
+        let r=0;
+        r<SIZE;
+        r++
     ) {
 
         for (
-            let col = 0;
-            col < BOARD_SIZE;
-            col++
+            let c=0;
+            c<SIZE;
+            c++
         ) {
 
 
-            /*
-             * Вправо
-             */
-
             if (
-                col <
-                BOARD_SIZE - 1
+                c<SIZE-1
             ) {
 
-                swapTiles(
-                    row,
-                    col,
-                    row,
-                    col + 1
+                swap(
+                    r,
+                    c,
+                    r,
+                    c+1
                 );
 
 
                 const found =
-                    findMatches().size;
+                    findMatches().length;
 
 
-                swapTiles(
-                    row,
-                    col,
-                    row,
-                    col + 1
+                swap(
+                    r,
+                    c,
+                    r,
+                    c+1
                 );
 
 
-                if (found > 0) {
+                if (found) {
 
                     return true;
 
@@ -3148,36 +2993,31 @@ function hasPossibleMove() {
             }
 
 
-            /*
-             * Вниз
-             */
-
             if (
-                row <
-                BOARD_SIZE - 1
+                r<SIZE-1
             ) {
 
-                swapTiles(
-                    row,
-                    col,
-                    row + 1,
-                    col
+                swap(
+                    r,
+                    c,
+                    r+1,
+                    c
                 );
 
 
                 const found =
-                    findMatches().size;
+                    findMatches().length;
 
 
-                swapTiles(
-                    row,
-                    col,
-                    row + 1,
-                    col
+                swap(
+                    r,
+                    c,
+                    r+1,
+                    c
                 );
 
 
-                if (found > 0) {
+                if (found) {
 
                     return true;
 
@@ -3196,30 +3036,145 @@ function hasPossibleMove() {
 
 
 /* =========================================================
-   CHECK GAME OVER
+   UPDATE
 ========================================================= */
 
-function checkGameOver() {
+function update() {
 
-    if (
-        blueCollected >= TARGET &&
-        greenCollected >= TARGET
-    ) {
-
-        showWin();
-
-        return;
-
-    }
+    scoreElement.textContent =
+        score;
 
 
-    if (
-        moves <= 0
-    ) {
+    movesElement.textContent =
+        moves;
 
-        showLose();
 
-    }
+    levelElement.textContent =
+        level;
+
+
+    coinsElement.textContent =
+        coins;
+
+
+    const target =
+        10 +
+        (level-1)*2;
+
+
+    blueElement.textContent =
+        blue +
+        " / " +
+        target;
+
+
+    greenElement.textContent =
+        green +
+        " / " +
+        target;
+
+
+    shuffleButton.disabled =
+        busy ||
+        moves<=0;
+
+
+    bombButton.disabled =
+        busy ||
+        moves<=0;
+
+
+    undoButton.disabled =
+        busy ||
+        !previousBoard;
+
+}
+
+
+/* =========================================================
+   SCORE POPUP
+========================================================= */
+
+function showScore(
+    points
+) {
+
+    const popup =
+        document.createElement(
+            "div"
+        );
+
+
+    popup.className =
+        "score-popup";
+
+
+    popup.textContent =
+        "+" +
+        points;
+
+
+    popup.style.left =
+        "50%";
+
+
+    popup.style.top =
+        "45%";
+
+
+    document.body.appendChild(
+        popup
+    );
+
+
+    setTimeout(
+        () => {
+
+            popup.remove();
+
+        },
+        800
+    );
+
+}
+
+
+/* =========================================================
+   COMBO
+========================================================= */
+
+function showCombo(
+    number
+) {
+
+    const element =
+        document.createElement(
+            "div"
+        );
+
+
+    element.className =
+        "combo";
+
+
+    element.textContent =
+        "КОМБО x" +
+        number;
+
+
+    document.body.appendChild(
+        element
+    );
+
+
+    setTimeout(
+        () => {
+
+            element.remove();
+
+        },
+        800
+    );
 
 }
 
@@ -3228,45 +3183,33 @@ function checkGameOver() {
    SAVE
 ========================================================= */
 
-function saveGame() {
+function save() {
 
     try {
 
-        const data = {
-
-            level: level,
-
-            score: score,
-
-            moves: moves,
-
-            coins: coins,
-
-            blueCollected:
-                blueCollected,
-
-            greenCollected:
-                greenCollected,
-
-            board: board
-
-        };
-
-
         localStorage.setItem(
             SAVE_KEY,
-            JSON.stringify(data)
+
+            JSON.stringify({
+
+                board,
+
+                score,
+
+                moves,
+
+                level,
+
+                coins,
+
+                blue,
+
+                green
+
+            })
         );
 
-
-    } catch (error) {
-
-        console.log(
-            "Save error:",
-            error
-        );
-
-    }
+    } catch(e) {}
 
 }
 
@@ -3275,7 +3218,7 @@ function saveGame() {
    LOAD
 ========================================================= */
 
-function loadGame() {
+function load() {
 
     try {
 
@@ -3297,9 +3240,8 @@ function loadGame() {
 
 
         if (
-            !data ||
-            !Array.isArray(data.board) ||
-            data.board.length !== BOARD_SIZE
+            !data.board ||
+            data.board.length !== SIZE
         ) {
 
             return false;
@@ -3311,10 +3253,6 @@ function loadGame() {
             data.board;
 
 
-        level =
-            Number(data.level) || 1;
-
-
         score =
             Number(data.score) || 0;
 
@@ -3324,33 +3262,25 @@ function loadGame() {
             START_MOVES;
 
 
+        level =
+            Number(data.level) || 1;
+
+
         coins =
-            Number(data.coins) ||
-            100;
+            Number(data.coins) || 100;
 
 
-        blueCollected =
-            Number(
-                data.blueCollected
-            ) || 0;
+        blue =
+            Number(data.blue) || 0;
 
 
-        greenCollected =
-            Number(
-                data.greenCollected
-            ) || 0;
+        green =
+            Number(data.green) || 0;
 
 
         return true;
 
-
-    } catch (error) {
-
-        console.log(
-            "Load error:",
-            error
-        );
-
+    } catch(e) {
 
         return false;
 
@@ -3360,20 +3290,17 @@ function loadGame() {
 
 
 /* =========================================================
-   SLEEP
+   WAIT
 ========================================================= */
 
-function sleep(ms) {
+function wait(ms) {
 
     return new Promise(
-        function(resolve) {
-
+        resolve =>
             setTimeout(
                 resolve,
                 ms
-            );
-
-        }
+            )
     );
 
 }
@@ -3383,28 +3310,14 @@ function sleep(ms) {
    START
 ========================================================= */
 
-function startGame() {
+function start() {
 
-    /*
-     * Telegram user
-     */
+    loadUser();
 
-    loadTelegramUser();
-
-
-    /*
-     * Сначала пробуем
-     * загрузить сохранение
-     */
 
     const loaded =
-        loadGame();
+        load();
 
-
-    /*
-     * Если сохранения нет —
-     * новая игра
-     */
 
     if (!loaded) {
 
@@ -3417,26 +3330,19 @@ function startGame() {
 
         coins = 100;
 
-        blueCollected = 0;
+        blue = 0;
 
-        greenCollected = 0;
-
-        selected = null;
-
-        previousBoard = null;
+        green = 0;
 
         createBoard();
 
     }
 
 
-    /*
-     * Проверяем поле
-     */
-
     if (
         !board ||
-        board.length !== BOARD_SIZE
+        board.length !== SIZE ||
+        !hasPossibleMove()
     ) {
 
         createBoard();
@@ -3444,21 +3350,13 @@ function startGame() {
     }
 
 
-    /*
-     * UI
-     */
+    update();
 
-    updateUI();
+    render();
 
-    renderBoard();
-
-
-    /*
-     * Убираем загрузчик
-     */
 
     setTimeout(
-        function() {
+        () => {
 
             loading.classList.add(
                 "hidden"
@@ -3471,11 +3369,7 @@ function startGame() {
 }
 
 
-/* =========================================================
-   START GAME
-========================================================= */
-
-startGame();
+start();
 
 </script>
 
