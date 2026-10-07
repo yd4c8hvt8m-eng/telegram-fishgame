@@ -2,6 +2,7 @@
 <html lang="ru">
 
 <head>
+
     <meta charset="UTF-8">
 
     <meta
@@ -9,31 +10,920 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
     >
 
-    <meta name="theme-color" content="#0878b8">
+    <meta
+        name="theme-color"
+        content="#0878b8"
+    >
 
     <title>Fish Match</title>
 
+
     <!-- Telegram Mini App -->
+
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <link rel="stylesheet" href="style.css">
+
+    <!-- =====================================================
+         CSS
+    ====================================================== -->
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+
+            -webkit-tap-highlight-color: transparent;
+        }
+
+
+        html,
+        body {
+
+            margin: 0;
+            padding: 0;
+
+            width: 100%;
+            min-height: 100%;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #78ddf8 0%,
+                    #38a9dc 45%,
+                    #0878b8 100%
+                );
+
+            color: white;
+
+            overflow-x: hidden;
+
+            user-select: none;
+            -webkit-user-select: none;
+
+            overscroll-behavior: none;
+        }
+
+
+        body {
+
+            min-height: 100vh;
+            min-height: 100dvh;
+
+        }
+
+
+        button {
+
+            font-family: inherit;
+
+        }
+
+
+        #app {
+
+            width: 100%;
+
+            max-width: 520px;
+
+            min-height: 100vh;
+            min-height: 100dvh;
+
+            margin: 0 auto;
+
+            padding:
+
+                calc(
+                    10px +
+                    env(safe-area-inset-top)
+                )
+
+                10px
+
+                calc(
+                    20px +
+                    env(safe-area-inset-bottom)
+                );
+
+        }
+
+
+        /* =================================================
+           HEADER
+        ================================================== */
+
+        .game-header {
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            margin-bottom: 10px;
+
+        }
+
+
+        .player {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 9px;
+
+        }
+
+
+        .avatar {
+
+            width: 44px;
+            height: 44px;
+
+            flex-shrink: 0;
+
+            border-radius: 50%;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background: white;
+
+            color: #087fbd;
+
+            font-size: 18px;
+
+            font-weight: 800;
+
+            overflow: hidden;
+
+            box-shadow:
+
+                0 3px 8px
+                rgba(0,0,0,.20);
+
+        }
+
+
+        .avatar img {
+
+            width: 100%;
+            height: 100%;
+
+            object-fit: cover;
+
+            display: block;
+
+        }
+
+
+        .player-name {
+
+            max-width: 180px;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+
+            white-space: nowrap;
+
+            font-size: 15px;
+
+            font-weight: 700;
+
+        }
+
+
+        .level-text {
+
+            margin-top: 2px;
+
+            font-size: 11px;
+
+            opacity: .8;
+
+        }
+
+
+        .coins {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+            padding:
+
+                7px
+                12px;
+
+            border-radius: 20px;
+
+            background:
+                rgba(0,0,0,.16);
+
+            font-size: 15px;
+
+            font-weight: 700;
+
+        }
+
+
+        .coin-icon {
+
+            font-size: 18px;
+
+        }
+
+
+        /* =================================================
+           STATS
+        ================================================== */
+
+        .stats {
+
+            display: grid;
+
+            grid-template-columns:
+                1fr 1fr;
+
+            gap: 8px;
+
+            margin-bottom: 8px;
+
+        }
+
+
+        .stat-box {
+
+            padding: 8px;
+
+            text-align: center;
+
+            border-radius: 14px;
+
+            background:
+                rgba(255,255,255,.18);
+
+            border:
+                1px solid
+                rgba(255,255,255,.25);
+
+        }
+
+
+        .stat-title {
+
+            font-size: 9px;
+
+            letter-spacing: .5px;
+
+            opacity: .8;
+
+        }
+
+
+        .stat-value {
+
+            margin-top: 2px;
+
+            font-size: 22px;
+
+            line-height: 23px;
+
+            font-weight: 800;
+
+        }
+
+
+        /* =================================================
+           TARGET
+        ================================================== */
+
+        .target-panel {
+
+            padding:
+
+                9px
+                12px;
+
+            margin-bottom: 10px;
+
+            border-radius: 14px;
+
+            background:
+                rgba(0,50,90,.18);
+
+        }
+
+
+        .target-title {
+
+            margin-bottom: 5px;
+
+            font-size: 9px;
+
+            letter-spacing: .5px;
+
+            opacity: .8;
+
+        }
+
+
+        .target-items {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 22px;
+
+        }
+
+
+        .target-item {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 5px;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+        }
+
+
+        .target-emoji {
+
+            font-size: 19px;
+
+        }
+
+
+        /* =================================================
+           GAME BOARD
+        ================================================== */
+
+        .game-board {
+
+            width: 100%;
+
+            aspect-ratio: 1 / 1;
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(8, 1fr);
+
+            grid-template-rows:
+                repeat(8, 1fr);
+
+            gap: 4px;
+
+            padding: 5px;
+
+            border-radius: 18px;
+
+            background:
+                rgba(0,55,95,.32);
+
+            box-shadow:
+
+                inset
+                0 2px 5px
+                rgba(0,0,0,.18),
+
+                0 7px 16px
+                rgba(0,0,0,.20);
+
+            touch-action: none;
+
+        }
+
+
+        /* =================================================
+           TILE
+        ================================================== */
+
+        .tile {
+
+            position: relative;
+
+            width: 100%;
+            height: 100%;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            border-radius: 12px;
+
+            font-size:
+                clamp(
+                    21px,
+                    8vw,
+                    42px
+                );
+
+            cursor: pointer;
+
+            transform: scale(1);
+
+            transition:
+
+                transform .12s ease,
+
+                filter .12s ease,
+
+                opacity .15s ease;
+
+            box-shadow:
+
+                inset
+                0 3px 4px
+                rgba(255,255,255,.42),
+
+                inset
+                0 -4px 5px
+                rgba(0,0,0,.16),
+
+                0 2px 4px
+                rgba(0,0,0,.18);
+
+            overflow: hidden;
+
+        }
+
+
+        .tile::after {
+
+            content: "";
+
+            position: absolute;
+
+            left: 13%;
+
+            top: 8%;
+
+            width: 42%;
+
+            height: 18%;
+
+            border-radius: 50%;
+
+            background:
+                rgba(255,255,255,.35);
+
+            transform:
+                rotate(-20deg);
+
+            pointer-events: none;
+
+        }
+
+
+        .tile.selected {
+
+            transform:
+                scale(.82);
+
+            filter:
+                brightness(1.25);
+
+            box-shadow:
+
+                0 0 0 3px white,
+
+                0 0 15px
+                rgba(255,255,255,.9);
+
+        }
+
+
+        .tile.removing {
+
+            animation:
+                disappear .22s
+                ease forwards;
+
+        }
+
+
+        @keyframes disappear {
+
+            0% {
+
+                transform: scale(1);
+
+                opacity: 1;
+
+            }
+
+            100% {
+
+                transform: scale(0);
+
+                opacity: 0;
+
+            }
+
+        }
+
+
+        /* =================================================
+           BOOSTERS
+        ================================================== */
+
+        .boosters {
+
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 7px;
+
+            margin-top: 10px;
+
+        }
+
+
+        .booster {
+
+            min-width: 0;
+
+            padding:
+
+                8px
+                4px;
+
+            border: none;
+
+            border-radius: 13px;
+
+            background:
+                rgba(255,255,255,.20);
+
+            color: white;
+
+            box-shadow:
+                0 3px 5px
+                rgba(0,0,0,.16);
+
+            cursor: pointer;
+
+        }
+
+
+        .booster:active {
+
+            transform:
+                scale(.95);
+
+        }
+
+
+        .booster:disabled {
+
+            opacity: .45;
+
+        }
+
+
+        .booster-icon {
+
+            display: block;
+
+            font-size: 21px;
+
+        }
+
+
+        .booster-name {
+
+            display: block;
+
+            margin-top: 3px;
+
+            font-size: 9px;
+
+        }
+
+
+        /* =================================================
+           MESSAGE
+        ================================================== */
+
+        .message {
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 1000;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 20px;
+
+            background:
+                rgba(0,0,0,.56);
+
+        }
+
+
+        .message.hidden {
+
+            display: none;
+
+        }
+
+
+        .message-window {
+
+            width: 100%;
+
+            max-width: 360px;
+
+            padding:
+
+                28px
+                20px;
+
+            text-align: center;
+
+            color: #12618a;
+
+            border-radius: 24px;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #ffffff,
+                    #e9f8ff
+                );
+
+            box-shadow:
+                0 15px 40px
+                rgba(0,0,0,.35);
+
+            animation:
+                popup .25s ease;
+
+        }
+
+
+        .message-icon {
+
+            font-size: 55px;
+
+        }
+
+
+        .message-window h2 {
+
+            margin:
+                9px
+                0
+                5px;
+
+        }
+
+
+        .message-window p {
+
+            margin:
+                0
+                0
+                20px;
+
+            color: #47788d;
+
+        }
+
+
+        .main-button {
+
+            width: 100%;
+
+            padding: 13px;
+
+            border: none;
+
+            border-radius: 14px;
+
+            color: white;
+
+            font-size: 16px;
+
+            font-weight: 700;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #39c8f1,
+                    #087fc1
+                );
+
+            box-shadow:
+                0 4px 8px
+                rgba(0,0,0,.20);
+
+            cursor: pointer;
+
+        }
+
+
+        .main-button:active {
+
+            transform:
+                scale(.97);
+
+        }
+
+
+        @keyframes popup {
+
+            from {
+
+                transform:
+                    scale(.7);
+
+                opacity: 0;
+
+            }
+
+            to {
+
+                transform:
+                    scale(1);
+
+                opacity: 1;
+
+            }
+
+        }
+
+
+        /* =================================================
+           LOADING
+        ================================================== */
+
+        .loading {
+
+            position: fixed;
+
+            inset: 0;
+
+            z-index: 2000;
+
+            display: flex;
+
+            flex-direction: column;
+
+            align-items: center;
+
+            justify-content: center;
+
+            gap: 10px;
+
+            background:
+                linear-gradient(
+                    180deg,
+                    #78ddf8,
+                    #0878b8
+                );
+
+            font-size: 15px;
+
+            transition:
+                opacity .3s ease;
+
+        }
+
+
+        .loading.hidden {
+
+            opacity: 0;
+
+            pointer-events: none;
+
+        }
+
+
+        .loading-spinner {
+
+            width: 38px;
+            height: 38px;
+
+            border-radius: 50%;
+
+            border:
+                4px solid
+                rgba(255,255,255,.35);
+
+            border-top-color:
+                white;
+
+            animation:
+                spinner .7s
+                linear infinite;
+
+        }
+
+
+        @keyframes spinner {
+
+            to {
+
+                transform:
+                    rotate(360deg);
+
+            }
+
+        }
+
+
+        /* =================================================
+           SMALL SCREEN
+        ================================================== */
+
+        @media (max-width: 360px) {
+
+            #app {
+
+                padding-left: 7px;
+                padding-right: 7px;
+
+            }
+
+
+            .game-board {
+
+                gap: 3px;
+
+                padding: 4px;
+
+            }
+
+
+            .tile {
+
+                border-radius: 9px;
+
+            }
+
+        }
+
+    </style>
+
 </head>
+
 
 <body>
 
+
 <div id="app">
 
-    <!-- ================= HEADER ================= -->
+
+    <!-- =================================================
+         HEADER
+    ================================================== -->
 
     <header class="game-header">
 
+
         <div class="player">
 
-            <div id="avatar" class="avatar">
+
+            <div
+                id="avatar"
+                class="avatar"
+            >
                 ?
             </div>
 
-            <div class="player-info">
+
+            <div>
+
 
                 <div
                     id="playerName"
@@ -42,26 +932,46 @@
                     Игрок
                 </div>
 
+
                 <div class="level-text">
+
                     Уровень
-                    <span id="level">1</span>
+                    <span id="level">
+                        1
+                    </span>
+
                 </div>
+
 
             </div>
 
+
         </div>
 
+
         <div class="coins">
-            <span class="coin-icon">🪙</span>
-            <span id="coins">100</span>
+
+            <span class="coin-icon">
+                🪙
+            </span>
+
+            <span id="coins">
+                100
+            </span>
+
         </div>
+
 
     </header>
 
 
-    <!-- ================= STATS ================= -->
+
+    <!-- =================================================
+         STATS
+    ================================================== -->
 
     <section class="stats">
+
 
         <div class="stat-box">
 
@@ -94,18 +1004,25 @@
 
         </div>
 
+
     </section>
 
 
-    <!-- ================= TARGET ================= -->
+
+    <!-- =================================================
+         TARGET
+    ================================================== -->
 
     <section class="target-panel">
+
 
         <div class="target-title">
             ЦЕЛЬ УРОВНЯ
         </div>
 
+
         <div class="target-items">
+
 
             <div class="target-item">
 
@@ -132,12 +1049,17 @@
 
             </div>
 
+
         </div>
+
 
     </section>
 
 
-    <!-- ================= GAME ================= -->
+
+    <!-- =================================================
+         GAME
+    ================================================== -->
 
     <main>
 
@@ -149,9 +1071,13 @@
     </main>
 
 
-    <!-- ================= BOOSTERS ================= -->
+
+    <!-- =================================================
+         BOOSTERS
+    ================================================== -->
 
     <section class="boosters">
+
 
         <button
             id="shuffleButton"
@@ -203,17 +1129,23 @@
 
         </button>
 
+
     </section>
 
 
-    <!-- ================= GAME MESSAGE ================= -->
+
+    <!-- =================================================
+         MESSAGE
+    ================================================== -->
 
     <div
         id="message"
         class="message hidden"
     >
 
+
         <div class="message-window">
+
 
             <div
                 id="messageIcon"
@@ -222,13 +1154,16 @@
                 🎉
             </div>
 
+
             <h2 id="messageTitle">
                 Уровень пройден!
             </h2>
 
+
             <p id="messageText">
                 Отличная работа!
             </p>
+
 
             <button
                 id="nextLevelButton"
@@ -238,12 +1173,17 @@
                 Следующий уровень
             </button>
 
+
         </div>
+
 
     </div>
 
 
-    <!-- ================= LOADING ================= -->
+
+    <!-- =================================================
+         LOADING
+    ================================================== -->
 
     <div
         id="loading"
@@ -258,10 +1198,2286 @@
 
     </div>
 
+
 </div>
 
 
-<script src="game.js"></script>
+
+<!-- =====================================================
+     JAVASCRIPT
+====================================================== -->
+
+<script>
+
+"use strict";
+
+
+/* =========================================================
+   TELEGRAM
+========================================================= */
+
+const tg =
+    window.Telegram &&
+    window.Telegram.WebApp
+        ? window.Telegram.WebApp
+        : null;
+
+
+if (tg) {
+
+    tg.ready();
+
+    tg.expand();
+
+    try {
+
+        tg.setHeaderColor(
+            "#42bce8"
+        );
+
+        tg.setBackgroundColor(
+            "#0878b8"
+        );
+
+    } catch (error) {
+
+        console.log(
+            "Telegram UI error"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   GAME SETTINGS
+========================================================= */
+
+const BOARD_SIZE = 8;
+
+const TILE_TYPES = 6;
+
+const START_MOVES = 30;
+
+const TARGET = 10;
+
+const SAVE_KEY =
+    "fish_match_game_v1";
+
+
+/* =========================================================
+   GAME ELEMENTS
+========================================================= */
+
+const EMOJIS = [
+
+    "🔵",
+    "🟢",
+    "🔴",
+    "🟡",
+    "🟣",
+    "🟠"
+
+];
+
+
+/* =========================================================
+   GAME VARIABLES
+========================================================= */
+
+let board = [];
+
+let score = 0;
+
+let moves = START_MOVES;
+
+let level = 1;
+
+let coins = 100;
+
+let blueCollected = 0;
+
+let greenCollected = 0;
+
+let selected = null;
+
+let previousBoard = null;
+
+let busy = false;
+
+
+/* =========================================================
+   HTML ELEMENTS
+========================================================= */
+
+const gameBoard =
+    document.getElementById(
+        "gameBoard"
+    );
+
+const scoreElement =
+    document.getElementById(
+        "score"
+    );
+
+const movesElement =
+    document.getElementById(
+        "moves"
+    );
+
+const levelElement =
+    document.getElementById(
+        "level"
+    );
+
+const coinsElement =
+    document.getElementById(
+        "coins"
+    );
+
+const blueTarget =
+    document.getElementById(
+        "blueTarget"
+    );
+
+const greenTarget =
+    document.getElementById(
+        "greenTarget"
+    );
+
+const playerName =
+    document.getElementById(
+        "playerName"
+    );
+
+const avatar =
+    document.getElementById(
+        "avatar"
+    );
+
+const message =
+    document.getElementById(
+        "message"
+    );
+
+const messageIcon =
+    document.getElementById(
+        "messageIcon"
+    );
+
+const messageTitle =
+    document.getElementById(
+        "messageTitle"
+    );
+
+const messageText =
+    document.getElementById(
+        "messageText"
+    );
+
+const nextLevelButton =
+    document.getElementById(
+        "nextLevelButton"
+    );
+
+const shuffleButton =
+    document.getElementById(
+        "shuffleButton"
+    );
+
+const bombButton =
+    document.getElementById(
+        "bombButton"
+    );
+
+const undoButton =
+    document.getElementById(
+        "undoButton"
+    );
+
+const loading =
+    document.getElementById(
+        "loading"
+    );
+
+
+/* =========================================================
+   TELEGRAM USER
+========================================================= */
+
+function loadTelegramUser() {
+
+    if (
+        !tg ||
+        !tg.initDataUnsafe ||
+        !tg.initDataUnsafe.user
+    ) {
+
+        playerName.textContent =
+            "Игрок";
+
+        avatar.textContent =
+            "?";
+
+        return;
+
+    }
+
+
+    const user =
+        tg.initDataUnsafe.user;
+
+
+    const name =
+        user.first_name ||
+        "Игрок";
+
+
+    playerName.textContent =
+        name;
+
+
+    if (user.photo_url) {
+
+        const img =
+            document.createElement(
+                "img"
+            );
+
+        img.src =
+            user.photo_url;
+
+        img.alt =
+            name;
+
+        avatar.innerHTML =
+            "";
+
+        avatar.appendChild(
+            img
+        );
+
+    } else {
+
+        avatar.textContent =
+            name
+                .charAt(0)
+                .toUpperCase();
+
+    }
+
+}
+
+
+/* =========================================================
+   RANDOM TILE
+========================================================= */
+
+function randomTile() {
+
+    return Math.floor(
+        Math.random() *
+        TILE_TYPES
+    );
+
+}
+
+
+/* =========================================================
+   CREATE BOARD
+========================================================= */
+
+function createBoard() {
+
+    board = [];
+
+
+    for (
+        let row = 0;
+        row < BOARD_SIZE;
+        row++
+    ) {
+
+        board[row] = [];
+
+
+        for (
+            let col = 0;
+            col < BOARD_SIZE;
+            col++
+        ) {
+
+            let tile;
+
+
+            do {
+
+                tile =
+                    randomTile();
+
+            } while (
+                createsInitialMatch(
+                    row,
+                    col,
+                    tile
+                )
+            );
+
+
+            board[row][col] =
+                tile;
+
+        }
+
+    }
+
+
+    /*
+     * Проверяем, есть ли ход
+     */
+
+    if (
+        !hasPossibleMove()
+    ) {
+
+        createBoard();
+
+    }
+
+}
+
+
+/* =========================================================
+   INITIAL MATCH CHECK
+========================================================= */
+
+function createsInitialMatch(
+    row,
+    col,
+    tile
+) {
+
+
+    /*
+     * Горизонталь
+     */
+
+    if (
+        col >= 2 &&
+        board[row][col - 1] === tile &&
+        board[row][col - 2] === tile
+    ) {
+
+        return true;
+
+    }
+
+
+    /*
+     * Вертикаль
+     */
+
+    if (
+        row >= 2 &&
+        board[row - 1][col] === tile &&
+        board[row - 2][col] === tile
+    ) {
+
+        return true;
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================================================
+   RENDER
+========================================================= */
+
+function renderBoard() {
+
+    gameBoard.innerHTML =
+        "";
+
+
+    for (
+        let row = 0;
+        row < BOARD_SIZE;
+        row++
+    ) {
+
+
+        for (
+            let col = 0;
+            col < BOARD_SIZE;
+            col++
+        ) {
+
+            const tile =
+                document.createElement(
+                    "div"
+                );
+
+
+            tile.className =
+                "tile";
+
+
+            tile.dataset.row =
+                row;
+
+            tile.dataset.col =
+                col;
+
+
+            tile.textContent =
+                EMOJIS[
+                    board[row][col]
+                ];
+
+
+            if (
+                selected &&
+                selected.row === row &&
+                selected.col === col
+            ) {
+
+                tile.classList.add(
+                    "selected"
+                );
+
+            }
+
+
+            addTileEvents(
+                tile,
+                row,
+                col
+            );
+
+
+            gameBoard.appendChild(
+                tile
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   TILE EVENTS
+========================================================= */
+
+function addTileEvents(
+    tile,
+    row,
+    col
+) {
+
+
+    /*
+     * CLICK
+     */
+
+    tile.addEventListener(
+        "click",
+        function() {
+
+            if (busy) {
+                return;
+            }
+
+            selectTile(
+                row,
+                col
+            );
+
+        }
+    );
+
+
+    /*
+     * SWIPE
+     */
+
+    let startX = 0;
+
+    let startY = 0;
+
+
+    tile.addEventListener(
+        "touchstart",
+        function(event) {
+
+            if (busy) {
+                return;
+            }
+
+
+            const touch =
+                event.touches[0];
+
+
+            startX =
+                touch.clientX;
+
+            startY =
+                touch.clientY;
+
+        },
+        {
+            passive: true
+        }
+    );
+
+
+    tile.addEventListener(
+        "touchend",
+        function(event) {
+
+            if (busy) {
+                return;
+            }
+
+
+            const touch =
+                event.changedTouches[0];
+
+
+            const dx =
+                touch.clientX -
+                startX;
+
+
+            const dy =
+                touch.clientY -
+                startY;
+
+
+            const minSwipe =
+                20;
+
+
+            /*
+             * Обычный клик
+             */
+
+            if (
+                Math.abs(dx) < minSwipe &&
+                Math.abs(dy) < minSwipe
+            ) {
+
+                selectTile(
+                    row,
+                    col
+                );
+
+                return;
+
+            }
+
+
+            let targetRow =
+                row;
+
+            let targetCol =
+                col;
+
+
+            /*
+             * Горизонталь
+             */
+
+            if (
+                Math.abs(dx) >
+                Math.abs(dy)
+            ) {
+
+                if (dx > 0) {
+
+                    targetCol++;
+
+                } else {
+
+                    targetCol--;
+
+                }
+
+            }
+
+
+            /*
+             * Вертикаль
+             */
+
+            else {
+
+                if (dy > 0) {
+
+                    targetRow++;
+
+                } else {
+
+                    targetRow--;
+
+                }
+
+            }
+
+
+            /*
+             * Границы
+             */
+
+            if (
+                targetRow < 0 ||
+                targetRow >= BOARD_SIZE ||
+                targetCol < 0 ||
+                targetCol >= BOARD_SIZE
+            ) {
+
+                return;
+
+            }
+
+
+            swapAndCheck(
+                row,
+                col,
+                targetRow,
+                targetCol
+            );
+
+        },
+        {
+            passive: true
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SELECT TILE
+========================================================= */
+
+function selectTile(
+    row,
+    col
+) {
+
+
+    /*
+     * Первая клетка
+     */
+
+    if (!selected) {
+
+        selected = {
+            row,
+            col
+        };
+
+        renderBoard();
+
+        return;
+
+    }
+
+
+    /*
+     * Та же клетка
+     */
+
+    if (
+        selected.row === row &&
+        selected.col === col
+    ) {
+
+        selected = null;
+
+        renderBoard();
+
+        return;
+
+    }
+
+
+    /*
+     * Соседняя
+     */
+
+    if (
+        isAdjacent(
+            selected.row,
+            selected.col,
+            row,
+            col
+        )
+    ) {
+
+        swapAndCheck(
+            selected.row,
+            selected.col,
+            row,
+            col
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Другая клетка
+     */
+
+    selected = {
+        row,
+        col
+    };
+
+    renderBoard();
+
+}
+
+
+/* =========================================================
+   ADJACENT
+========================================================= */
+
+function isAdjacent(
+    row1,
+    col1,
+    row2,
+    col2
+) {
+
+    return (
+        Math.abs(row1 - row2) +
+        Math.abs(col1 - col2)
+    ) === 1;
+
+}
+
+
+/* =========================================================
+   SWAP
+========================================================= */
+
+function swapTiles(
+    row1,
+    col1,
+    row2,
+    col2
+) {
+
+    const temp =
+        board[row1][col1];
+
+
+    board[row1][col1] =
+        board[row2][col2];
+
+
+    board[row2][col2] =
+        temp;
+
+}
+
+
+/* =========================================================
+   COPY BOARD
+========================================================= */
+
+function copyBoard() {
+
+    return board.map(
+        function(row) {
+
+            return [...row];
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SWAP AND CHECK
+========================================================= */
+
+async function swapAndCheck(
+    row1,
+    col1,
+    row2,
+    col2
+) {
+
+    if (busy) {
+        return;
+    }
+
+
+    busy = true;
+
+
+    /*
+     * Сохраняем поле
+     */
+
+    previousBoard =
+        copyBoard();
+
+
+    /*
+     * Меняем клетки
+     */
+
+    swapTiles(
+        row1,
+        col1,
+        row2,
+        col2
+    );
+
+
+    selected = null;
+
+
+    renderBoard();
+
+
+    await sleep(120);
+
+
+    /*
+     * Ищем комбинации
+     */
+
+    const matches =
+        findMatches();
+
+
+    /*
+     * Если комбинации нет,
+     * возвращаем клетки
+     */
+
+    if (matches.size === 0) {
+
+        swapTiles(
+            row1,
+            col1,
+            row2,
+            col2
+        );
+
+
+        previousBoard =
+            null;
+
+
+        renderBoard();
+
+
+        busy = false;
+
+        return;
+
+    }
+
+
+    /*
+     * Ход потрачен
+     */
+
+    moves--;
+
+
+    updateUI();
+
+
+    /*
+     * Обрабатываем совпадения
+     */
+
+    await processMatches();
+
+
+    /*
+     * Проверяем результат
+     */
+
+    if (
+        blueCollected >= TARGET &&
+        greenCollected >= TARGET
+    ) {
+
+        showWin();
+
+        busy = false;
+
+        saveGame();
+
+        return;
+
+    }
+
+
+    if (moves <= 0) {
+
+        showLose();
+
+        busy = false;
+
+        saveGame();
+
+        return;
+
+    }
+
+
+    /*
+     * Если ходов нет —
+     * создаём новый ход
+     */
+
+    if (
+        !hasPossibleMove()
+    ) {
+
+        shuffleBoard();
+
+        renderBoard();
+
+    }
+
+
+    updateUI();
+
+    saveGame();
+
+
+    busy = false;
+
+}
+
+
+/* =========================================================
+   FIND MATCHES
+========================================================= */
+
+function findMatches() {
+
+    const matches =
+        new Set();
+
+
+    /*
+     * HORIZONTAL
+     */
+
+    for (
+        let row = 0;
+        row < BOARD_SIZE;
+        row++
+    ) {
+
+        let start = 0;
+
+
+        while (
+            start < BOARD_SIZE
+        ) {
+
+            const type =
+                board[row][start];
+
+
+            let end =
+                start + 1;
+
+
+            while (
+                end < BOARD_SIZE &&
+                board[row][end] === type
+            ) {
+
+                end++;
+
+            }
+
+
+            if (
+                end - start >= 3
+            ) {
+
+                for (
+                    let col = start;
+                    col < end;
+                    col++
+                ) {
+
+                    matches.add(
+                        row + "," + col
+                    );
+
+                }
+
+            }
+
+
+            start = end;
+
+        }
+
+    }
+
+
+    /*
+     * VERTICAL
+     */
+
+    for (
+        let col = 0;
+        col < BOARD_SIZE;
+        col++
+    ) {
+
+        let start = 0;
+
+
+        while (
+            start < BOARD_SIZE
+        ) {
+
+            const type =
+                board[start][col];
+
+
+            let end =
+                start + 1;
+
+
+            while (
+                end < BOARD_SIZE &&
+                board[end][col] === type
+            ) {
+
+                end++;
+
+            }
+
+
+            if (
+                end - start >= 3
+            ) {
+
+                for (
+                    let row = start;
+                    row < end;
+                    row++
+                ) {
+
+                    matches.add(
+                        row + "," + col
+                    );
+
+                }
+
+            }
+
+
+            start = end;
+
+        }
+
+    }
+
+
+    return matches;
+
+}
+
+
+/* =========================================================
+   PROCESS MATCHES
+========================================================= */
+
+async function processMatches() {
+
+    let combo = 0;
+
+
+    while (true) {
+
+        const matches =
+            findMatches();
+
+
+        if (
+            matches.size === 0
+        ) {
+
+            break;
+
+        }
+
+
+        combo++;
+
+
+        /*
+         * Считаем цели
+         */
+
+        for (
+            const key of matches
+        ) {
+
+            const parts =
+                key.split(",");
+
+
+            const row =
+                Number(parts[0]);
+
+
+            const col =
+                Number(parts[1]);
+
+
+            const type =
+                board[row][col];
+
+
+            if (type === 0) {
+
+                blueCollected++;
+
+            }
+
+
+            if (type === 1) {
+
+                greenCollected++;
+
+            }
+
+        }
+
+
+        /*
+         * Очки
+         */
+
+        score +=
+            matches.size *
+            10 *
+            combo;
+
+
+        /*
+         * Удаляем
+         */
+
+        for (
+            const key of matches
+        ) {
+
+            const parts =
+                key.split(",");
+
+
+            const row =
+                Number(parts[0]);
+
+
+            const col =
+                Number(parts[1]);
+
+
+            board[row][col] =
+                null;
+
+        }
+
+
+        updateUI();
+
+
+        await sleep(180);
+
+
+        /*
+         * Падаем
+         */
+
+        collapseBoard();
+
+
+        renderBoard();
+
+
+        await sleep(180);
+
+
+        /*
+         * Заполняем
+         */
+
+        fillBoard();
+
+
+        renderBoard();
+
+
+        await sleep(180);
+
+    }
+
+}
+
+
+/* =========================================================
+   COLLAPSE
+========================================================= */
+
+function collapseBoard() {
+
+    for (
+        let col = 0;
+        col < BOARD_SIZE;
+        col++
+    ) {
+
+        let write =
+            BOARD_SIZE - 1;
+
+
+        for (
+            let row =
+                BOARD_SIZE - 1;
+            row >= 0;
+            row--
+        ) {
+
+            if (
+                board[row][col] !== null
+            ) {
+
+                board[write][col] =
+                    board[row][col];
+
+
+                if (
+                    write !== row
+                ) {
+
+                    board[row][col] =
+                        null;
+
+                }
+
+
+                write--;
+
+            }
+
+        }
+
+
+        while (
+            write >= 0
+        ) {
+
+            board[write][col] =
+                null;
+
+            write--;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   FILL
+========================================================= */
+
+function fillBoard() {
+
+    for (
+        let row = 0;
+        row < BOARD_SIZE;
+        row++
+    ) {
+
+        for (
+            let col = 0;
+            col < BOARD_SIZE;
+            col++
+        ) {
+
+            if (
+                board[row][col] === null
+            ) {
+
+                board[row][col] =
+                    randomTile();
+
+            }
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   UPDATE UI
+========================================================= */
+
+function updateUI() {
+
+    scoreElement.textContent =
+        score;
+
+
+    movesElement.textContent =
+        moves;
+
+
+    levelElement.textContent =
+        level;
+
+
+    coinsElement.textContent =
+        coins;
+
+
+    blueTarget.textContent =
+        Math.min(
+            blueCollected,
+            TARGET
+        ) +
+        " / " +
+        TARGET;
+
+
+    greenTarget.textContent =
+        Math.min(
+            greenCollected,
+            TARGET
+        ) +
+        " / " +
+        TARGET;
+
+
+    shuffleButton.disabled =
+        busy ||
+        moves <= 0;
+
+
+    bombButton.disabled =
+        busy ||
+        moves <= 0;
+
+
+    undoButton.disabled =
+        busy ||
+        !previousBoard;
+
+}
+
+
+/* =========================================================
+   WIN
+========================================================= */
+
+function showWin() {
+
+    messageIcon.textContent =
+        "🎉";
+
+
+    messageTitle.textContent =
+        "Уровень пройден!";
+
+
+    messageText.textContent =
+        "Ты набрал " +
+        score +
+        " очков.";
+
+
+    nextLevelButton.textContent =
+        "Следующий уровень";
+
+
+    message.classList.remove(
+        "hidden"
+    );
+
+
+    busy = true;
+
+}
+
+
+/* =========================================================
+   LOSE
+========================================================= */
+
+function showLose() {
+
+    messageIcon.textContent =
+        "😔";
+
+
+    messageTitle.textContent =
+        "Ходы закончились";
+
+
+    messageText.textContent =
+        "Попробуй пройти уровень ещё раз.";
+
+
+    nextLevelButton.textContent =
+        "Начать заново";
+
+
+    message.classList.remove(
+        "hidden"
+    );
+
+
+    busy = true;
+
+}
+
+
+/* =========================================================
+   NEXT LEVEL
+========================================================= */
+
+nextLevelButton.addEventListener(
+    "click",
+    function() {
+
+
+        const won =
+            blueCollected >= TARGET &&
+            greenCollected >= TARGET;
+
+
+        message.classList.add(
+            "hidden"
+        );
+
+
+        if (won) {
+
+            level++;
+
+            coins += 50;
+
+        }
+
+
+        score = 0;
+
+        moves =
+            START_MOVES;
+
+
+        blueCollected = 0;
+
+        greenCollected = 0;
+
+
+        selected = null;
+
+        previousBoard = null;
+
+
+        createBoard();
+
+
+        updateUI();
+
+        renderBoard();
+
+
+        busy = false;
+
+
+        saveGame();
+
+    }
+);
+
+
+/* =========================================================
+   SHUFFLE BUTTON
+========================================================= */
+
+shuffleButton.addEventListener(
+    "click",
+    function() {
+
+        if (
+            busy ||
+            moves <= 0
+        ) {
+
+            return;
+
+        }
+
+
+        previousBoard =
+            copyBoard();
+
+
+        moves--;
+
+
+        shuffleBoard();
+
+
+        updateUI();
+
+        renderBoard();
+
+
+        if (moves <= 0) {
+
+            checkGameOver();
+
+        }
+
+
+        saveGame();
+
+    }
+);
+
+
+/* =========================================================
+   SHUFFLE BOARD
+========================================================= */
+
+function shuffleBoard() {
+
+    let attempts = 0;
+
+
+    do {
+
+        const values = [];
+
+
+        for (
+            let row = 0;
+            row < BOARD_SIZE;
+            row++
+        ) {
+
+            for (
+                let col = 0;
+                col < BOARD_SIZE;
+                col++
+            ) {
+
+                values.push(
+                    board[row][col]
+                );
+
+            }
+
+        }
+
+
+        /*
+         * Fisher-Yates
+         */
+
+        for (
+            let i =
+                values.length - 1;
+            i > 0;
+            i--
+        ) {
+
+            const j =
+                Math.floor(
+                    Math.random() *
+                    (i + 1)
+                );
+
+
+            const temp =
+                values[i];
+
+
+            values[i] =
+                values[j];
+
+
+            values[j] =
+                temp;
+
+        }
+
+
+        let index = 0;
+
+
+        for (
+            let row = 0;
+            row < BOARD_SIZE;
+            row++
+        ) {
+
+            for (
+                let col = 0;
+                col < BOARD_SIZE;
+                col++
+            ) {
+
+                board[row][col] =
+                    values[index++];
+
+            }
+
+        }
+
+
+        attempts++;
+
+
+        if (
+            findMatches().size === 0 &&
+            hasPossibleMove()
+        ) {
+
+            break;
+
+        }
+
+
+    } while (
+        attempts < 100
+    );
+
+
+    /*
+     * Если не получилось —
+     * создаём новое поле
+     */
+
+    if (
+        findMatches().size > 0 ||
+        !hasPossibleMove()
+    ) {
+
+        createBoard();
+
+    }
+
+}
+
+
+/* =========================================================
+   BOMB
+========================================================= */
+
+bombButton.addEventListener(
+    "click",
+    async function() {
+
+        if (
+            busy ||
+            moves <= 0
+        ) {
+
+            return;
+
+        }
+
+
+        busy = true;
+
+
+        previousBoard =
+            copyBoard();
+
+
+        moves--;
+
+
+        /*
+         * Случайная клетка
+         */
+
+        const centerRow =
+            Math.floor(
+                Math.random() *
+                BOARD_SIZE
+            );
+
+
+        const centerCol =
+            Math.floor(
+                Math.random() *
+                BOARD_SIZE
+            );
+
+
+        /*
+         * Уничтожаем 3x3
+         */
+
+        for (
+            let row =
+                centerRow - 1;
+            row <= centerRow + 1;
+            row++
+        ) {
+
+            for (
+                let col =
+                    centerCol - 1;
+                col <= centerCol + 1;
+                col++
+            ) {
+
+
+                if (
+                    row >= 0 &&
+                    row < BOARD_SIZE &&
+                    col >= 0 &&
+                    col < BOARD_SIZE
+                ) {
+
+                    const type =
+                        board[row][col];
+
+
+                    if (type === 0) {
+
+                        blueCollected++;
+
+                    }
+
+
+                    if (type === 1) {
+
+                        greenCollected++;
+
+                    }
+
+
+                    board[row][col] =
+                        null;
+
+
+                    score += 10;
+
+                }
+
+            }
+
+        }
+
+
+        updateUI();
+
+        renderBoard();
+
+
+        await sleep(180);
+
+
+        collapseBoard();
+
+        fillBoard();
+
+
+        renderBoard();
+
+
+        if (
+            blueCollected >= TARGET &&
+            greenCollected >= TARGET
+        ) {
+
+            showWin();
+
+        }
+
+
+        else if (
+            moves <= 0
+        ) {
+
+            showLose();
+
+        }
+
+
+        else {
+
+            busy = false;
+
+        }
+
+
+        saveGame();
+
+    }
+);
+
+
+/* =========================================================
+   UNDO
+========================================================= */
+
+undoButton.addEventListener(
+    "click",
+    function() {
+
+        if (
+            busy ||
+            !previousBoard
+        ) {
+
+            return;
+
+        }
+
+
+        board =
+            previousBoard.map(
+                function(row) {
+
+                    return [...row];
+
+                }
+            );
+
+
+        previousBoard =
+            null;
+
+
+        renderBoard();
+
+        updateUI();
+
+    }
+);
+
+
+/* =========================================================
+   POSSIBLE MOVE
+========================================================= */
+
+function hasPossibleMove() {
+
+    for (
+        let row = 0;
+        row < BOARD_SIZE;
+        row++
+    ) {
+
+        for (
+            let col = 0;
+            col < BOARD_SIZE;
+            col++
+        ) {
+
+
+            /*
+             * Вправо
+             */
+
+            if (
+                col <
+                BOARD_SIZE - 1
+            ) {
+
+                swapTiles(
+                    row,
+                    col,
+                    row,
+                    col + 1
+                );
+
+
+                const found =
+                    findMatches().size;
+
+
+                swapTiles(
+                    row,
+                    col,
+                    row,
+                    col + 1
+                );
+
+
+                if (found > 0) {
+
+                    return true;
+
+                }
+
+            }
+
+
+            /*
+             * Вниз
+             */
+
+            if (
+                row <
+                BOARD_SIZE - 1
+            ) {
+
+                swapTiles(
+                    row,
+                    col,
+                    row + 1,
+                    col
+                );
+
+
+                const found =
+                    findMatches().size;
+
+
+                swapTiles(
+                    row,
+                    col,
+                    row + 1,
+                    col
+                );
+
+
+                if (found > 0) {
+
+                    return true;
+
+                }
+
+            }
+
+        }
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================================================
+   CHECK GAME OVER
+========================================================= */
+
+function checkGameOver() {
+
+    if (
+        blueCollected >= TARGET &&
+        greenCollected >= TARGET
+    ) {
+
+        showWin();
+
+        return;
+
+    }
+
+
+    if (
+        moves <= 0
+    ) {
+
+        showLose();
+
+    }
+
+}
+
+
+/* =========================================================
+   SAVE
+========================================================= */
+
+function saveGame() {
+
+    try {
+
+        const data = {
+
+            level: level,
+
+            score: score,
+
+            moves: moves,
+
+            coins: coins,
+
+            blueCollected:
+                blueCollected,
+
+            greenCollected:
+                greenCollected,
+
+            board: board
+
+        };
+
+
+        localStorage.setItem(
+            SAVE_KEY,
+            JSON.stringify(data)
+        );
+
+
+    } catch (error) {
+
+        console.log(
+            "Save error:",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   LOAD
+========================================================= */
+
+function loadGame() {
+
+    try {
+
+        const raw =
+            localStorage.getItem(
+                SAVE_KEY
+            );
+
+
+        if (!raw) {
+
+            return false;
+
+        }
+
+
+        const data =
+            JSON.parse(raw);
+
+
+        if (
+            !data ||
+            !Array.isArray(data.board) ||
+            data.board.length !== BOARD_SIZE
+        ) {
+
+            return false;
+
+        }
+
+
+        board =
+            data.board;
+
+
+        level =
+            Number(data.level) || 1;
+
+
+        score =
+            Number(data.score) || 0;
+
+
+        moves =
+            Number(data.moves) ||
+            START_MOVES;
+
+
+        coins =
+            Number(data.coins) ||
+            100;
+
+
+        blueCollected =
+            Number(
+                data.blueCollected
+            ) || 0;
+
+
+        greenCollected =
+            Number(
+                data.greenCollected
+            ) || 0;
+
+
+        return true;
+
+
+    } catch (error) {
+
+        console.log(
+            "Load error:",
+            error
+        );
+
+
+        return false;
+
+    }
+
+}
+
+
+/* =========================================================
+   SLEEP
+========================================================= */
+
+function sleep(ms) {
+
+    return new Promise(
+        function(resolve) {
+
+            setTimeout(
+                resolve,
+                ms
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   START
+========================================================= */
+
+function startGame() {
+
+    /*
+     * Telegram user
+     */
+
+    loadTelegramUser();
+
+
+    /*
+     * Сначала пробуем
+     * загрузить сохранение
+     */
+
+    const loaded =
+        loadGame();
+
+
+    /*
+     * Если сохранения нет —
+     * новая игра
+     */
+
+    if (!loaded) {
+
+        level = 1;
+
+        score = 0;
+
+        moves =
+            START_MOVES;
+
+        coins = 100;
+
+        blueCollected = 0;
+
+        greenCollected = 0;
+
+        selected = null;
+
+        previousBoard = null;
+
+        createBoard();
+
+    }
+
+
+    /*
+     * Проверяем поле
+     */
+
+    if (
+        !board ||
+        board.length !== BOARD_SIZE
+    ) {
+
+        createBoard();
+
+    }
+
+
+    /*
+     * UI
+     */
+
+    updateUI();
+
+    renderBoard();
+
+
+    /*
+     * Убираем загрузчик
+     */
+
+    setTimeout(
+        function() {
+
+            loading.classList.add(
+                "hidden"
+            );
+
+        },
+        200
+    );
+
+}
+
+
+/* =========================================================
+   START GAME
+========================================================= */
+
+startGame();
+
+</script>
 
 </body>
 
