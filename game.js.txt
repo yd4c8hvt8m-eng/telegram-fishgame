@@ -1,0 +1,2266 @@
+"use strict";
+
+
+/* =========================================================
+   TELEGRAM MINI APP
+========================================================= */
+
+const tg =
+    window.Telegram &&
+    window.Telegram.WebApp
+        ? window.Telegram.WebApp
+        : null;
+
+
+if (tg) {
+
+    tg.ready();
+
+    tg.expand();
+
+    try {
+
+        tg.setHeaderColor("#42bce8");
+
+        tg.setBackgroundColor("#0878b8");
+
+    } catch (error) {
+
+        console.log(
+            "Telegram UI settings unavailable"
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   CONFIG
+========================================================= */
+
+const BOARD_SIZE = 8;
+
+const TILE_TYPES = 6;
+
+const START_MOVES = 30;
+
+const TARGET_AMOUNT = 10;
+
+const STORAGE_KEY =
+    "fish_match_game_save_v1";
+
+
+/* =========================================================
+   TILE TYPES
+========================================================= */
+
+const TILE_EMOJIS = [
+
+    "🔵",
+    "🟢",
+    "🔴",
+    "🟡",
+    "🟣",
+    "🟠"
+
+];
+
+
+/* =========================================================
+   GAME STATE
+========================================================= */
+
+let board = [];
+
+let score = 0;
+
+let moves = START_MOVES;
+
+let level = 1;
+
+let coins = 100;
+
+let blueCollected = 0;
+
+let greenCollected = 0;
+
+let selected = null;
+
+let busy = false;
+
+let previousBoard = null;
+
+
+/* =========================================================
+   DOM
+========================================================= */
+
+const gameBoard =
+    document.getElementById(
+        "gameBoard"
+    );
+
+const scoreElement =
+    document.getElementById(
+        "score"
+    );
+
+const movesElement =
+    document.getElementById(
+        "moves"
+    );
+
+const levelElement =
+    document.getElementById(
+        "level"
+    );
+
+const coinsElement =
+    document.getElementById(
+        "coins"
+    );
+
+const blueTargetElement =
+    document.getElementById(
+        "blueTarget"
+    );
+
+const greenTargetElement =
+    document.getElementById(
+        "greenTarget"
+    );
+
+const playerNameElement =
+    document.getElementById(
+        "playerName"
+    );
+
+const avatarElement =
+    document.getElementById(
+        "avatar"
+    );
+
+const message =
+    document.getElementById(
+        "message"
+    );
+
+const messageIcon =
+    document.getElementById(
+        "messageIcon"
+    );
+
+const messageTitle =
+    document.getElementById(
+        "messageTitle"
+    );
+
+const messageText =
+    document.getElementById(
+        "messageText"
+    );
+
+const nextLevelButton =
+    document.getElementById(
+        "nextLevelButton"
+    );
+
+const loading =
+    document.getElementById(
+        "loading"
+    );
+
+const shuffleButton =
+    document.getElementById(
+        "shuffleButton"
+    );
+
+const bombButton =
+    document.getElementById(
+        "bombButton"
+    );
+
+const undoButton =
+    document.getElementById(
+        "undoButton"
+    );
+
+
+/* =========================================================
+   TELEGRAM USER
+========================================================= */
+
+function loadTelegramUser() {
+
+    if (
+        !tg ||
+        !tg.initDataUnsafe ||
+        !tg.initDataUnsafe.user
+    ) {
+
+        playerNameElement.textContent =
+            "Игрок";
+
+        avatarElement.textContent =
+            "?";
+
+        return;
+
+    }
+
+
+    const user =
+        tg.initDataUnsafe.user;
+
+
+    const name =
+        user.first_name ||
+        "Игрок";
+
+
+    playerNameElement.textContent =
+        name;
+
+
+    if (user.photo_url) {
+
+        const image =
+            document.createElement("img");
+
+        image.src =
+            user.photo_url;
+
+        image.alt =
+            name;
+
+        avatarElement.innerHTML =
+            "";
+
+        avatarElement.appendChild(
+            image
+        );
+
+    } else {
+
+        avatarElement.textContent =
+            name
+                .charAt(0)
+                .toUpperCase();
+
+    }
+
+}
+
+
+/* =========================================================
+   RANDOM TILE
+========================================================= */
+
+function randomTile() {
+
+    return Math.floor(
+        Math.random() *
+        TILE_TYPES
+    );
+
+}
+
+
+/* =========================================================
+   CREATE BOARD
+========================================================= */
+
+function createBoard() {
+
+    board = [];
+
+    for (
+        let row = 0;
+        row < BOARD_SIZE;
+        row++
+    ) {
+
+        board[row] = [];
+
+        for (
+            let col = 0;
+            col < BOARD_SIZE;
+            col++
+        ) {
+
+            let tile;
+
+            do {
+
+                tile =
+                    randomTile();
+
+            } while (
+                createsInitialMatch(
+                    row,
+                    col,
+                    tile
+                )
+            );
+
+            board[row][col] =
+                tile;
+
+        }
+
+    }
+
+
+    /*
+     * Теоретически поле может получиться
+     * без доступного хода.
+     * Проверяем это.
+     */
+
+    if (
+        !hasPossibleMove()
+    ) {
+
+        createBoard();
+
+    }
+
+}
+
+
+/* =========================================================
+   PREVENT INITIAL MATCH
+========================================================= */
+
+function createsInitialMatch(
+    row,
+    col,
+    tile
+) {
+
+    /*
+     * Горизонтальная тройка
+     */
+
+    if (
+        col >= 2 &&
+        board[row][col - 1] === tile &&
+        board[row][col - 2] === tile
+    ) {
+
+        return true;
+
+    }
+
+
+    /*
+     * Вертикальная тройка
+     */
+
+    if (
+        row >= 2 &&
+        board[row - 1][col] === tile &&
+        board[row - 2][col] === tile
+    ) {
+
+        return true;
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================================================
+   RENDER BOARD
+========================================================= */
+
+function renderBoard() {
+
+    gameBoard.innerHTML =
+        "";
+
+
+    for (
+        let row = 0;
+        row < BOARD_SIZE;
+        row++
+    ) {
+
+        for (
+            let col = 0;
+            col < BOARD_SIZE;
+            col++
+        ) {
+
+            const value =
+                board[row][col];
+
+
+            const tile =
+                document.createElement(
+                    "div"
+                );
+
+
+            tile.className =
+                "tile";
+
+
+            tile.dataset.row =
+                row;
+
+            tile.dataset.col =
+                col;
+
+
+            tile.textContent =
+                TILE_EMOJIS[value];
+
+
+            /*
+             * Выделение
+             */
+
+            if (
+                selected &&
+                selected.row === row &&
+                selected.col === col
+            ) {
+
+                tile.classList.add(
+                    "selected"
+                );
+
+            }
+
+
+            addTileEvents(
+                tile,
+                row,
+                col
+            );
+
+
+            gameBoard.appendChild(
+                tile
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   TILE EVENTS
+========================================================= */
+
+function addTileEvents(
+    tile,
+    row,
+    col
+) {
+
+
+    /*
+     * CLICK
+     */
+
+    tile.addEventListener(
+        "click",
+        () => {
+
+            if (busy) {
+                return;
+            }
+
+            selectTile(
+                row,
+                col
+            );
+
+        }
+    );
+
+
+    /*
+     * TOUCH
+     */
+
+    let startX = 0;
+
+    let startY = 0;
+
+    let touching = false;
+
+
+    tile.addEventListener(
+        "touchstart",
+        event => {
+
+            if (busy) {
+                return;
+            }
+
+
+            const touch =
+                event.touches[0];
+
+
+            startX =
+                touch.clientX;
+
+            startY =
+                touch.clientY;
+
+            touching = true;
+
+        },
+        {
+            passive: true
+        }
+    );
+
+
+    tile.addEventListener(
+        "touchend",
+        event => {
+
+            if (
+                busy ||
+                !touching
+            ) {
+
+                return;
+
+            }
+
+
+            touching = false;
+
+
+            const touch =
+                event.changedTouches[0];
+
+
+            const dx =
+                touch.clientX -
+                startX;
+
+
+            const dy =
+                touch.clientY -
+                startY;
+
+
+            const minimumSwipe =
+                20;
+
+
+            /*
+             * Просто нажали
+             */
+
+            if (
+                Math.abs(dx) <
+                    minimumSwipe &&
+                Math.abs(dy) <
+                    minimumSwipe
+            ) {
+
+                selectTile(
+                    row,
+                    col
+                );
+
+                return;
+
+            }
+
+
+            let targetRow =
+                row;
+
+            let targetCol =
+                col;
+
+
+            /*
+             * Горизонтальный свайп
+             */
+
+            if (
+                Math.abs(dx) >
+                Math.abs(dy)
+            ) {
+
+                if (dx > 0) {
+
+                    targetCol++;
+
+                } else {
+
+                    targetCol--;
+
+                }
+
+            }
+
+
+            /*
+             * Вертикальный свайп
+             */
+
+            else {
+
+                if (dy > 0) {
+
+                    targetRow++;
+
+                } else {
+
+                    targetRow--;
+
+                }
+
+            }
+
+
+            /*
+             * Проверяем границы
+             */
+
+            if (
+                targetRow < 0 ||
+                targetRow >= BOARD_SIZE ||
+                targetCol < 0 ||
+                targetCol >= BOARD_SIZE
+            ) {
+
+                return;
+
+            }
+
+
+            swapAndCheck(
+                row,
+                col,
+                targetRow,
+                targetCol
+            );
+
+        },
+        {
+            passive: true
+        }
+    );
+
+}
+
+
+/* =========================================================
+   SELECT TILE
+========================================================= */
+
+function selectTile(
+    row,
+    col
+) {
+
+    /*
+     * Первая клетка
+     */
+
+    if (!selected) {
+
+        selected = {
+            row,
+            col
+        };
+
+        renderBoard();
+
+        return;
+
+    }
+
+
+    /*
+     * Нажали на ту же клетку
+     */
+
+    if (
+        selected.row === row &&
+        selected.col === col
+    ) {
+
+        selected = null;
+
+        renderBoard();
+
+        return;
+
+    }
+
+
+    /*
+     * Соседняя клетка
+     */
+
+    if (
+        isAdjacent(
+            selected.row,
+            selected.col,
+            row,
+            col
+        )
+    ) {
+
+        swapAndCheck(
+            selected.row,
+            selected.col,
+            row,
+            col
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * Если клетка далеко —
+     * просто выбираем её
+     */
+
+    selected = {
+        row,
+        col
+    };
+
+    renderBoard();
+
+}
+
+
+/* =========================================================
+   ADJACENT
+========================================================= */
+
+function isAdjacent(
+    row1,
+    col1,
+    row2,
+    col2
+) {
+
+    return (
+        Math.abs(row1 - row2) +
+        Math.abs(col1 - col2)
+    ) === 1;
+
+}
+
+
+/* =========================================================
+   SAVE PREVIOUS BOARD
+========================================================= */
+
+function copyBoard() {
+
+    return board.map(
+        row => [...row]
+    );
+
+}
+
+
+/* =========================================================
+   SWAP + CHECK
+========================================================= */
+
+async function swapAndCheck(
+    row1,
+    col1,
+    row2,
+    col2
+) {
+
+    if (busy) {
+        return;
+    }
+
+
+    busy = true;
+
+
+    /*
+     * Сохраняем состояние
+     * для кнопки "Отмена"
+     */
+
+    previousBoard =
+        copyBoard();
+
+
+    swapTiles(
+        row1,
+        col1,
+        row2,
+        col2
+    );
+
+
+    selected = null;
+
+
+    renderBoard();
+
+
+    await sleep(150);
+
+
+    /*
+     * Проверяем совпадения
+     */
+
+    const matches =
+        findMatches();
+
+
+    /*
+     * Если совпадения нет —
+     * возвращаем всё назад
+     */
+
+    if (matches.size === 0) {
+
+        swapTiles(
+            row1,
+            col1,
+            row2,
+            col2
+        );
+
+
+        previousBoard =
+            null;
+
+
+        renderBoard();
+
+
+        await sleep(120);
+
+
+        busy = false;
+
+        return;
+
+    }
+
+
+    /*
+     * Уменьшаем количество ходов
+     */
+
+    moves--;
+
+    updateUI();
+
+
+    /*
+     * Обрабатываем комбинации
+     */
+
+    await processMatches();
+
+
+    /*
+     * Проверяем победу/поражение
+     */
+
+    checkGameState();
+
+
+    /*
+     * Если поле стало без ходов —
+     * перемешиваем автоматически
+     */
+
+    if (
+        !isLevelFinished() &&
+        !hasPossibleMove()
+    ) {
+
+        await sleep(150);
+
+        shuffleBoard();
+
+        renderBoard();
+
+    }
+
+
+    saveGame();
+
+
+    busy = false;
+
+}
+
+
+/* =========================================================
+   SWAP
+========================================================= */
+
+function swapTiles(
+    row1,
+    col1,
+    row2,
+    col2
+) {
+
+    const temp =
+        board[row1][col1];
+
+
+    board[row1][col1] =
+        board[row2][col2];
+
+
+    board[row2][col2] =
+        temp;
+
+}
+
+
+/* =========================================================
+   FIND MATCHES
+========================================================= */
+
+function findMatches() {
+
+    const matches =
+        new Set();
+
+
+    /*
+     * HORIZONTAL
+     */
+
+    for (
+        let row = 0;
+        row < BOARD_SIZE;
+        row++
+    ) {
+
+        let start = 0;
+
+
+        while (
+            start < BOARD_SIZE
+        ) {
+
+            const type =
+                board[row][start];
+
+
+            let end =
+                start + 1;
+
+
+            while (
+                end < BOARD_SIZE &&
+                board[row][end] === type
+            ) {
+
+                end++;
+
+            }
+
+
+            const length =
+                end - start;
+
+
+            if (length >= 3) {
+
+                for (
+                    let col = start;
+                    col < end;
+                    col++
+                ) {
+
+                    matches.add(
+                        `${row},${col}`
+                    );
+
+                }
+
+            }
+
+
+            start = end;
+
+        }
+
+    }
+
+
+    /*
+     * VERTICAL
+     */
+
+    for (
+        let col = 0;
+        col < BOARD_SIZE;
+        col++
+    ) {
+
+        let start = 0;
+
+
+        while (
+            start < BOARD_SIZE
+        ) {
+
+            const type =
+                board[start][col];
+
+
+            let end =
+                start + 1;
+
+
+            while (
+                end < BOARD_SIZE &&
+                board[end][col] === type
+            ) {
+
+                end++;
+
+            }
+
+
+            const length =
+                end - start;
+
+
+            if (length >= 3) {
+
+                for (
+                    let row = start;
+                    row < end;
+                    row++
+                ) {
+
+                    matches.add(
+                        `${row},${col}`
+                    );
+
+                }
+
+            }
+
+
+            start = end;
+
+        }
+
+    }
+
+
+    return matches;
+
+}
+
+
+/* =========================================================
+   PROCESS MATCHES
+========================================================= */
+
+async function processMatches() {
+
+    let combo = 0;
+
+
+    while (true) {
+
+        const matches =
+            findMatches();
+
+
+        if (matches.size === 0) {
+
+            break;
+
+        }
+
+
+        combo++;
+
+
+        /*
+         * Считаем элементы целей
+         */
+
+        for (
+            const key of matches
+        ) {
+
+            const [
+                row,
+                col
+            ] =
+                key
+                    .split(",")
+                    .map(Number);
+
+
+            const type =
+                board[row][col];
+
+
+            /*
+             * BLUE
+             */
+
+            if (type === 0) {
+
+                blueCollected++;
+
+            }
+
+
+            /*
+             * GREEN
+             */
+
+            if (type === 1) {
+
+                greenCollected++;
+
+            }
+
+        }
+
+
+        /*
+         * Начисляем очки
+         */
+
+        score +=
+            matches.size *
+            10 *
+            combo;
+
+
+        /*
+         * Удаляем
+         */
+
+        for (
+            const key of matches
+        ) {
+
+            const [
+                row,
+                col
+            ] =
+                key
+                    .split(",")
+                    .map(Number);
+
+
+            board[row][col] =
+                null;
+
+        }
+
+
+        updateUI();
+
+
+        /*
+         * Небольшая пауза
+         */
+
+        await sleep(180);
+
+
+        /*
+         * Падаем
+         */
+
+        collapseBoard();
+
+
+        renderBoard();
+
+
+        await sleep(220);
+
+
+        /*
+         * Заполняем пустые места
+         */
+
+        fillBoard();
+
+
+        renderBoard();
+
+
+        await sleep(220);
+
+    }
+
+}
+
+
+/* =========================================================
+   COLLAPSE BOARD
+========================================================= */
+
+function collapseBoard() {
+
+    for (
+        let col = 0;
+        col < BOARD_SIZE;
+        col++
+    ) {
+
+        let writeRow =
+            BOARD_SIZE - 1;
+
+
+        for (
+            let row =
+                BOARD_SIZE - 1;
+            row >= 0;
+            row--
+        ) {
+
+            if (
+                board[row][col] !== null
+            ) {
+
+                board[writeRow][col] =
+                    board[row][col];
+
+
+                if (
+                    writeRow !== row
+                ) {
+
+                    board[row][col] =
+                        null;
+
+                }
+
+
+                writeRow--;
+
+            }
+
+        }
+
+
+        while (
+            writeRow >= 0
+        ) {
+
+            board[writeRow][col] =
+                null;
+
+            writeRow--;
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   FILL BOARD
+========================================================= */
+
+function fillBoard() {
+
+    for (
+        let row = 0;
+        row < BOARD_SIZE;
+        row++
+    ) {
+
+        for (
+            let col = 0;
+            col < BOARD_SIZE;
+            col++
+        ) {
+
+            if (
+                board[row][col] === null
+            ) {
+
+                board[row][col] =
+                    randomTile();
+
+            }
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   UPDATE UI
+========================================================= */
+
+function updateUI() {
+
+    scoreElement.textContent =
+        score;
+
+
+    movesElement.textContent =
+        moves;
+
+
+    levelElement.textContent =
+        level;
+
+
+    coinsElement.textContent =
+        coins;
+
+
+    blueTargetElement.textContent =
+        `${Math.min(
+            blueCollected,
+            TARGET_AMOUNT
+        )} / ${TARGET_AMOUNT}`;
+
+
+    greenTargetElement.textContent =
+        `${Math.min(
+            greenCollected,
+            TARGET_AMOUNT
+        )} / ${TARGET_AMOUNT}`;
+
+
+    /*
+     * Блокируем кнопки,
+     * если ходы закончились
+     */
+
+    const disabled =
+        moves <= 0 ||
+        busy;
+
+
+    shuffleButton.disabled =
+        disabled;
+
+
+    bombButton.disabled =
+        disabled;
+
+
+    undoButton.disabled =
+        busy ||
+        !previousBoard;
+
+}
+
+
+/* =========================================================
+   CHECK LEVEL FINISHED
+========================================================= */
+
+function isLevelFinished() {
+
+    return (
+        blueCollected >= TARGET_AMOUNT &&
+        greenCollected >= TARGET_AMOUNT
+    );
+
+}
+
+
+/* =========================================================
+   CHECK GAME STATE
+========================================================= */
+
+function checkGameState() {
+
+    /*
+     * Победа
+     */
+
+    if (
+        isLevelFinished()
+    ) {
+
+        showWin();
+
+        return;
+
+    }
+
+
+    /*
+     * Поражение
+     */
+
+    if (
+        moves <= 0
+    ) {
+
+        showLose();
+
+    }
+
+}
+
+
+/* =========================================================
+   SHOW WIN
+========================================================= */
+
+function showWin() {
+
+    busy = true;
+
+
+    messageIcon.textContent =
+        "🎉";
+
+
+    messageTitle.textContent =
+        "Уровень пройден!";
+
+
+    messageText.textContent =
+        `Ты набрал ${score} очков.`;
+
+
+    nextLevelButton.textContent =
+        "Следующий уровень";
+
+
+    message.classList.remove(
+        "hidden"
+    );
+
+
+    saveGame();
+
+}
+
+
+/* =========================================================
+   SHOW LOSE
+========================================================= */
+
+function showLose() {
+
+    busy = true;
+
+
+    messageIcon.textContent =
+        "😔";
+
+
+    messageTitle.textContent =
+        "Ходы закончились";
+
+
+    messageText.textContent =
+        "Попробуй пройти уровень ещё раз.";
+
+
+    nextLevelButton.textContent =
+        "Начать заново";
+
+
+    message.classList.remove(
+        "hidden"
+    );
+
+}
+
+
+/* =========================================================
+   NEXT LEVEL
+========================================================= */
+
+nextLevelButton.addEventListener(
+    "click",
+    () => {
+
+        message.classList.add(
+            "hidden"
+        );
+
+
+        /*
+         * Если победили
+         */
+
+        if (
+            isLevelFinished()
+        ) {
+
+            level++;
+
+            coins += 50;
+
+        }
+
+
+        /*
+         * Новый уровень
+         */
+
+        score = 0;
+
+        moves =
+            START_MOVES;
+
+
+        blueCollected = 0;
+
+        greenCollected = 0;
+
+
+        selected = null;
+
+        previousBoard = null;
+
+
+        createBoard();
+
+        updateUI();
+
+        renderBoard();
+
+
+        busy = false;
+
+
+        saveGame();
+
+    }
+);
+
+
+/* =========================================================
+   SHUFFLE
+========================================================= */
+
+shuffleButton.addEventListener(
+    "click",
+    () => {
+
+        if (
+            busy ||
+            moves <= 0
+        ) {
+
+            return;
+
+        }
+
+
+        previousBoard =
+            copyBoard();
+
+
+        moves--;
+
+
+        shuffleBoard();
+
+
+        updateUI();
+
+        renderBoard();
+
+
+        checkGameState();
+
+
+        saveGame();
+
+    }
+);
+
+
+/* =========================================================
+   SHUFFLE BOARD
+========================================================= */
+
+function shuffleBoard() {
+
+    const values = [];
+
+
+    /*
+     * Собираем все клетки
+     */
+
+    for (
+        let row = 0;
+        row < BOARD_SIZE;
+        row++
+    ) {
+
+        for (
+            let col = 0;
+            col < BOARD_SIZE;
+            col++
+        ) {
+
+            values.push(
+                board[row][col]
+            );
+
+        }
+
+    }
+
+
+    /*
+     * Перемешиваем
+     */
+
+    for (
+        let i = values.length - 1;
+        i > 0;
+        i--
+    ) {
+
+        const j =
+            Math.floor(
+                Math.random() *
+                (i + 1)
+            );
+
+
+        [
+            values[i],
+            values[j]
+        ] =
+        [
+            values[j],
+            values[i]
+        ];
+
+    }
+
+
+    /*
+     * Записываем обратно
+     */
+
+    let index = 0;
+
+
+    for (
+        let row = 0;
+        row < BOARD_SIZE;
+        row++
+    ) {
+
+        for (
+            let col = 0;
+            col < BOARD_SIZE;
+            col++
+        ) {
+
+            board[row][col] =
+                values[index++];
+
+        }
+
+    }
+
+
+    /*
+     * Если получилась комбинация
+     * или нет хода — создаём заново
+     */
+
+    if (
+        findMatches().size > 0 ||
+        !hasPossibleMove()
+    ) {
+
+        createBoard();
+
+    }
+
+}
+
+
+/* =========================================================
+   BOMB
+========================================================= */
+
+bombButton.addEventListener(
+    "click",
+    async () => {
+
+        if (
+            busy ||
+            moves <= 0
+        ) {
+
+            return;
+
+        }
+
+
+        busy = true;
+
+
+        previousBoard =
+            copyBoard();
+
+
+        moves--;
+
+
+        /*
+         * Случайная клетка
+         */
+
+        const row =
+            Math.floor(
+                Math.random() *
+                BOARD_SIZE
+            );
+
+
+        const col =
+            Math.floor(
+                Math.random() *
+                BOARD_SIZE
+            );
+
+
+        /*
+         * Уничтожаем область 3×3
+         */
+
+        for (
+            let r = row - 1;
+            r <= row + 1;
+            r++
+        ) {
+
+            for (
+                let c = col - 1;
+                c <= col + 1;
+                c++
+            ) {
+
+                if (
+                    r >= 0 &&
+                    r < BOARD_SIZE &&
+                    c >= 0 &&
+                    c < BOARD_SIZE
+                ) {
+
+                    const type =
+                        board[r][c];
+
+
+                    if (type === 0) {
+
+                        blueCollected++;
+
+                    }
+
+
+                    if (type === 1) {
+
+                        greenCollected++;
+
+                    }
+
+
+                    board[r][c] =
+                        null;
+
+
+                    score += 10;
+
+                }
+
+            }
+
+        }
+
+
+        updateUI();
+
+        renderBoard();
+
+
+        await sleep(180);
+
+
+        collapseBoard();
+
+        fillBoard();
+
+
+        renderBoard();
+
+
+        checkGameState();
+
+
+        saveGame();
+
+
+        busy = false;
+
+    }
+);
+
+
+/* =========================================================
+   UNDO
+========================================================= */
+
+undoButton.addEventListener(
+    "click",
+    () => {
+
+        if (
+            busy ||
+            !previousBoard
+        ) {
+
+            return;
+
+        }
+
+
+        board =
+            previousBoard.map(
+                row => [...row]
+            );
+
+
+        previousBoard =
+            null;
+
+
+        renderBoard();
+
+        updateUI();
+
+    }
+);
+
+
+/* =========================================================
+   POSSIBLE MOVE
+========================================================= */
+
+function hasPossibleMove() {
+
+    /*
+     * Проверяем каждую возможную
+     * перестановку соседних клеток.
+     */
+
+    for (
+        let row = 0;
+        row < BOARD_SIZE;
+        row++
+    ) {
+
+        for (
+            let col = 0;
+            col < BOARD_SIZE;
+            col++
+        ) {
+
+
+            /*
+             * Справа
+             */
+
+            if (
+                col < BOARD_SIZE - 1
+            ) {
+
+                swapTiles(
+                    row,
+                    col,
+                    row,
+                    col + 1
+                );
+
+
+                const matches =
+                    findMatches().size;
+
+
+                swapTiles(
+                    row,
+                    col,
+                    row,
+                    col + 1
+                );
+
+
+                if (
+                    matches > 0
+                ) {
+
+                    return true;
+
+                }
+
+            }
+
+
+            /*
+             * Вниз
+             */
+
+            if (
+                row < BOARD_SIZE - 1
+            ) {
+
+                swapTiles(
+                    row,
+                    col,
+                    row + 1,
+                    col
+                );
+
+
+                const matches =
+                    findMatches().size;
+
+
+                swapTiles(
+                    row,
+                    col,
+                    row + 1,
+                    col
+                );
+
+
+                if (
+                    matches > 0
+                ) {
+
+                    return true;
+
+                }
+
+            }
+
+        }
+
+    }
+
+
+    return false;
+
+}
+
+
+/* =========================================================
+   SAVE GAME
+========================================================= */
+
+function saveGame() {
+
+    try {
+
+        const save = {
+
+            level,
+
+            score,
+
+            moves,
+
+            coins,
+
+            blueCollected,
+
+            greenCollected,
+
+            board
+
+        };
+
+
+        localStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify(save)
+        );
+
+    } catch (error) {
+
+        console.log(
+            "Не удалось сохранить игру",
+            error
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   LOAD GAME
+========================================================= */
+
+function loadGame() {
+
+    try {
+
+        const saved =
+            localStorage.getItem(
+                STORAGE_KEY
+            );
+
+
+        if (!saved) {
+
+            return false;
+
+        }
+
+
+        const data =
+            JSON.parse(saved);
+
+
+        /*
+         * Проверяем данные
+         */
+
+        if (
+            !data ||
+            !Array.isArray(data.board) ||
+            data.board.length !== BOARD_SIZE
+        ) {
+
+            return false;
+
+        }
+
+
+        board =
+            data.board;
+
+
+        level =
+            Number(data.level) || 1;
+
+
+        score =
+            Number(data.score) || 0;
+
+
+        moves =
+            Number(data.moves) || START_MOVES;
+
+
+        coins =
+            Number(data.coins) || 100;
+
+
+        blueCollected =
+            Number(data.blueCollected) || 0;
+
+
+        greenCollected =
+            Number(data.greenCollected) || 0;
+
+
+        return true;
+
+    } catch (error) {
+
+        console.log(
+            "Ошибка загрузки сохранения",
+            error
+        );
+
+
+        return false;
+
+    }
+
+}
+
+
+/* =========================================================
+   SLEEP
+========================================================= */
+
+function sleep(ms) {
+
+    return new Promise(
+        resolve => {
+
+            setTimeout(
+                resolve,
+                ms
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   HAPTIC
+========================================================= */
+
+function haptic(style = "light") {
+
+    if (
+        tg &&
+        tg.HapticFeedback
+    ) {
+
+        try {
+
+            tg.HapticFeedback
+                .impactOccurred(
+                    style
+                );
+
+        } catch (error) {
+
+            // Ничего не делаем
+
+        }
+
+    }
+
+}
+
+
+/* =========================================================
+   PATCH SWAP FOR HAPTIC
+========================================================= */
+
+const originalSwapAndCheck =
+    swapAndCheck;
+
+
+/* =========================================================
+   START GAME
+========================================================= */
+
+function startGame() {
+
+    /*
+     * Загружаем Telegram-пользователя
+     */
+
+    loadTelegramUser();
+
+
+    /*
+     * Пытаемся загрузить
+     * сохранённую игру
+     */
+
+    const loaded =
+        loadGame();
+
+
+    /*
+     * Если сохранения нет —
+     * создаём новую игру
+     */
+
+    if (!loaded) {
+
+        level = 1;
+
+        score = 0;
+
+        moves =
+            START_MOVES;
+
+        coins = 100;
+
+        blueCollected = 0;
+
+        greenCollected = 0;
+
+        createBoard();
+
+    }
+
+
+    /*
+     * Проверяем поле
+     */
+
+    if (
+        !board ||
+        board.length !== BOARD_SIZE ||
+        !hasPossibleMove()
+    ) {
+
+        createBoard();
+
+    }
+
+
+    /*
+     * Интерфейс
+     */
+
+    updateUI();
+
+    renderBoard();
+
+
+    /*
+     * Убираем загрузку
+     */
+
+    setTimeout(
+        () => {
+
+            loading.classList.add(
+                "hidden"
+            );
+
+        },
+        150
+    );
+
+}
+
+
+startGame();
